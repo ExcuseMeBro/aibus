@@ -9,10 +9,11 @@ export async function advance(issue, adapters, agents) {
       return { stage: 'planned', sub }
     }
     case 'planned': {
+      // MVP: drive the first sub-task to an MR. Multi-sub fan-out is a later slice.
       const sub = issue.sub?.[0] || { title: issue.title }
       const { branch, title } = await agents.dev(sub)
       const mr = repo.openMR({ title, branch, issueId: issue.id })
-      const result = ci.runPipeline(mr)
+      const result = await ci.runPipeline(mr) // await: real CI adapters are async
       if (result.status === 'pass') {
         plane.updateIssue(issue.id, { state: 'in_qa', mrId: mr.id })
         return { stage: 'in_qa', mrId: mr.id, ci: result }

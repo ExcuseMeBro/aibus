@@ -14,7 +14,8 @@ export async function runToGate(issueId, adapters, agents, maxSteps = 10) {
     const after = adapters.plane.getIssue(issueId).state
     if (after === before) return adapters.plane.getIssue(issueId) // no progress
   }
-  return adapters.plane.getIssue(issueId)
+  // exhausted maxSteps without reaching a gate — flag so callers can distinguish
+  return { ...adapters.plane.getIssue(issueId), timedOut: true }
 }
 
 // CLI demo: HERMES_MODE=fake node pipeline/run.mjs <issueId>
