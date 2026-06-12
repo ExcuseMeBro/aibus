@@ -1,0 +1,11 @@
+# secrets — never commit
+.env
+**/.env
+*.pem
+*.key
+
+# local tooling artifacts
+codedb.snapshot
+.DS_Store
+
+# keep .todos board tracked (intentional)

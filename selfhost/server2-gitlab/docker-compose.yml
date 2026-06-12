@@ -1,0 +1,50 @@
+# Server 2 — GitLab CE (Bitbucket + CI/CD alternative)
+# GitLab alone on this box -> it owns 80/443 and runs its own Let's Encrypt.
+# Host SSH stays on 22; GitLab git-ssh published on 2222.
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: unless-stopped
+    hostname: gitlab.adam.uz
+    shm_size: '256m'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.adam.uz'
+        # --- Let's Encrypt (needs port 80 reachable from internet) ---
+        letsencrypt['enable'] = true
+        letsencrypt['contact_emails'] = ['admin@adam.uz']
+        nginx['redirect_http_to_https'] = true
+        # --- git over SSH on 2222 (host 22 = system sshd) ---
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        # --- trim memory on small boxes ---
+        puma['worker_processes'] = 2
+        sidekiq['max_concurrency'] = 10
+        prometheus_monitoring['enable'] = false
+        # --- outbound mail via Mailcow (server3) ---
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = 'mail.adam.uz'
+        gitlab_rails['smtp_port'] = 587
+        gitlab_rails['smtp_user_name'] = 'gitlab@adam.uz'
+        gitlab_rails['smtp_password'] = ENV['GITLAB_SMTP_PASSWORD']
+        gitlab_rails['smtp_domain'] = 'adam.uz'
+        gitlab_rails['smtp_authentication'] = 'login'
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['gitlab_email_from'] = 'gitlab@adam.uz'
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2222:22"
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/lib/gitlab
+    healthcheck:
+      test: ["CMD", "/opt/gitlab/bin/gitlab-healthcheck", "--fail"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 300s

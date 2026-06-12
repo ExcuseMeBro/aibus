@@ -1,0 +1,6 @@
+# secrets — never commit
+.env
+**/.env
+server1-plane-docs/plane/plane.env
+server1-plane-docs/plane/plane-app/
+*.pem

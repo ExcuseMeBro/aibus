@@ -1,0 +1,28 @@
+# Caddy — TLS front for server1 (Plane + Docmost)
+# Auto Let's Encrypt. Runs on host :80/:443.
+# Install: apt install -y caddy   (or docker). Put this at /etc/caddy/Caddyfile
+#
+# Requires DNS A records already pointing here:
+#   plane.adam.uz -> server1 IP
+#   docs.adam.uz  -> server1 IP
+
+{
+	email admin@adam.uz
+}
+
+# --- Docmost (Confluence alternative) ---
+docs.adam.uz {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3000
+}
+
+# --- Plane (Jira alternative) ---
+# Plane's own proxy container listens on 127.0.0.1:8082 (set in plane.env).
+plane.adam.uz {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8082 {
+		# Plane uses websockets for live updates
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+	}
+}
