@@ -48,3 +48,16 @@ test('parseUpdates empty result → no signals, null offset', () => {
   assert.deepEqual(signals, [])
   assert.equal(nextOffset, null)
 })
+
+test('filter: /task@other_bot in group rejected', () => {
+  assert.equal(filter({ chat: { id: -10, type: 'group' }, text: '/task@other_bot foo', message_id: 9, from: { username: 'al' }, date: 1700000000 }), false)
+})
+
+test('parseUpdates drops mention-only empty-text signal', () => {
+  const json = { ok: true, result: [
+    { update_id: 200, message: { chat: { id: -10, type: 'group' }, text: '@brodyone_bot', message_id: 9, from: { username: 'al' }, date: 1700000000 } },
+  ] }
+  const { signals, nextOffset } = parseUpdates(json)
+  assert.equal(signals.length, 0)
+  assert.equal(nextOffset, 201)
+})

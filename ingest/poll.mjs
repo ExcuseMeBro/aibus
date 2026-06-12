@@ -2,7 +2,7 @@
 // Network + filesystem only; pure logic lives in telegram.mjs / dedup.mjs.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { parseUpdates } from './telegram.mjs'
-import { fingerprint, isSeen, markSeen } from './dedup.mjs'
+import { fingerprint, checkAndMark } from './dedup.mjs'
 
 const OFFSET_PATH = '.hermes/tg-offset'
 
@@ -34,13 +34,11 @@ async function main() {
     console.error(`telegram error: ${JSON.stringify(json)}`)
     process.exit(2)
   }
-  const { signals, nextOffset } = parseUpdates(json)
+  const botUsername = process.env.BOT_USERNAME || undefined
+  const { signals, nextOffset } = parseUpdates(json, botUsername)
   const fresh = []
   for (const s of signals) {
-    const fp = fingerprint(s)
-    if (isSeen(fp)) continue
-    markSeen(fp)
-    fresh.push(s)
+    if (checkAndMark(fingerprint(s))) fresh.push(s)
   }
   if (nextOffset != null) setOffset(nextOffset)
   process.stdout.write(JSON.stringify(fresh, null, 2))

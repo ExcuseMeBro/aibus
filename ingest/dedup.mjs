@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'node:fs'
 import { dirname } from 'node:path'
 
 const SEEN_PATH = '.hermes/seen.json'
@@ -16,12 +16,18 @@ export function fingerprint(signal) {
 
 function load(path = SEEN_PATH) {
   if (!existsSync(path)) return new Set()
-  return new Set(JSON.parse(readFileSync(path, 'utf8')))
+  try {
+    return new Set(JSON.parse(readFileSync(path, 'utf8')))
+  } catch {
+    return new Set() // corrupted file → start fresh, never brick ingestion
+  }
 }
 
 function save(set, path = SEEN_PATH) {
   mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, JSON.stringify([...set]))
+  const tmp = `${path}.tmp`
+  writeFileSync(tmp, JSON.stringify([...set]))
+  renameSync(tmp, path) // atomic on POSIX
 }
 
 export function isSeen(fp, path = SEEN_PATH) {
@@ -32,4 +38,14 @@ export function markSeen(fp, path = SEEN_PATH) {
   const set = load(path)
   set.add(fp)
   save(set, path)
+}
+
+// Single load/check/add/save — avoids TOCTOU between isSeen+markSeen.
+// Returns true if fp was NEW (and is now recorded), false if already seen.
+export function checkAndMark(fp, path = SEEN_PATH) {
+  const set = load(path)
+  if (set.has(fp)) return false
+  set.add(fp)
+  save(set, path)
+  return true
 }

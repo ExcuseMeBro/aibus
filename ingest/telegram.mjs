@@ -4,7 +4,11 @@ export function filter(message, botUsername = BOT_USERNAME) {
   if (!message || typeof message.text !== 'string') return false
   if (message.chat?.type === 'private') return true
   const text = message.text
-  if (/^\/task(@\w+)?(\s|$)/.test(text)) return true
+  const cmd = text.match(/^\/task(@(\w+))?(\s|$)/)
+  if (cmd) {
+    // bare /task, or /task@thisbot only — ignore commands aimed at other bots
+    return !cmd[2] || cmd[2].toLowerCase() === botUsername.toLowerCase()
+  }
   return text.includes(`@${botUsername}`)
 }
 
@@ -30,7 +34,10 @@ export function parseUpdates(json, botUsername = BOT_USERNAME) {
   for (const u of updates) {
     if (typeof u.update_id === 'number') maxId = Math.max(maxId, u.update_id)
     const msg = u.message
-    if (msg && filter(msg, botUsername)) signals.push(toSignal(msg, botUsername))
+    if (msg && filter(msg, botUsername)) {
+      const s = toSignal(msg, botUsername)
+      if (s.text) signals.push(s) // drop mention-only / empty-text noise
+    }
   }
   return { signals, nextOffset: maxId >= 0 ? maxId + 1 : null }
 }
