@@ -11,9 +11,9 @@
 
 ```
                           ┌─────────────────────────────────────┐
-   Email ──┐              │            HERMES                    │
-   Slack ──┼──► Ingest ──►│  (Orchestrator / Router / Gatekeeper)│
-   Manual ─┘              └──────────────┬──────────────────────┘
+  Telegram ─┐             │            HERMES                    │
+   Email ───┼──► Ingest ─►│  (Orchestrator / Router / Gatekeeper)│
+   Manual ──┘             └──────────────┬──────────────────────┘
                                          │ vazifani role agentga marshrutlaydi
         ┌────────────────────────────────┼────────────────────────────────┐
         ▼              ▼                  ▼              ▼                  ▼
@@ -67,7 +67,7 @@ Har bir agent = alohida system prompt + cheklangan tool to'plami + aniq "Definit
 Whiteboard oqimi: `Futures → Plane → PO → PM → Dev → QA → DevOps → PM → PO → Release → loop`.
 
 ```
-[0] SIGNAL           Email (Mailcow) / Slack / manual  → Hermes ingest
+[0] SIGNAL           Telegram (bot) / Email (Mailcow) / manual  → Hermes ingest
                      │  (AI: 100%) — ingest mexanizmi: §4.1
 [1] PO TRIAGE        muammo? feature? bug? prioritet?
                      AI Plane Issue + acceptance criteria yozadi
@@ -128,26 +128,30 @@ Har bir tashqi tizim = MCP server. Agentlar tool orqali kiradi.
 
 ### 4.1 Ingest mexanizmi (signal → Hermes)
 
-Email signal qanday vazifaga aylanadi:
+**Asosiy manba = Telegram bot** (`@brodyone_bot`). Email (Mailcow) = ikkilamchi.
 
 ```
-Mailcow (server3) ──IMAP IDLE/poll──► ingest-worker ──► Hermes dispatch
-   yangi xat              har 60s yoki push        REST→Plane PO triage
+Telegram bot ──getUpdates(offset)──► /loop poll (CC) ──► PO triage
+  yangi xabar        har ~2 min        filter+dedup     REST→Plane Issue
 ```
 
-- **Xat o'qish:** Mailcow MCP (yoki IMAP) — agent inbox'ni o'qiydi.
-- **Trigger:** MCP = pull (agent so'rashi kerak), shuning uchun signal'ni push qiluvchi yengil worker baribir kerak:
-  - **MVP:** ingest-worker poll 60s → yangi xat bo'lsa Hermes'ga `Agent` chaqirig'i.
-  - **Production:** Mailcow → webhook/Sieve → HTTP endpoint → Hermes router (Agent SDK).
-- Slack/manual: bir xil dispatch interfeysi (`signal` obyekt: `{source, from, subject, body, ts}`).
+- **MVP (Path A):** Claude Code sessiyasi `/loop 2m /hermes-ingest` bilan
+  `ingest/poll.mjs` ni ishga tushiradi → `getUpdates?offset=` → yangi xabar →
+  filter → signal → dedup → PO agent. Alohida servis yo'q. **Qurilgan + live.**
+- **Filter:** group'da faqat `@bot` mention yoki `/task` komut (bot privacy mode
+  ON — Telegram o'zi majburlaydi); bot DM hammasi.
+- **Email (ikkilamchi):** Mailcow MCP/IMAP — xuddi shu `signal` interfeysiga
+  map qilinadi, keyingi slice.
+- **Production:** Telegram webhook → HTTP endpoint → Hermes router (Agent SDK).
+- Slack/manual: bir xil dispatch (`signal` = `{chat_id, msg_id, from, text, ts}`).
 
 ### 4.2 Dedup / idempotentlik
 
-PO agent har emailni Issue qilmasligi uchun:
-- Har signal uchun **fingerprint** = `hash(from + normalized_subject + thread_id)`.
-- Hermes memory (`agentmemory` MCP) da ko'rilgan fingerprintlar saqlanadi.
-- Mavjud thread → yangi Issue emas, mavjud Issue'ga komment.
-- Reply/auto-reply (`Re:`, `Auto-Submitted` header) → triage'dan o'tkazib yuboriladi.
+PO agent har xabarni Issue qilmasligi uchun:
+- Har signal uchun **fingerprint** = `sha256(chat_id + ":" + normalize(text))`.
+- Ko'rilgan fingerprintlar `.hermes/seen.json` (yoki `agentmemory` MCP) da.
+- Offset faqat muvaffaqiyatli batch'dan keyin advance → at-least-once + idempotent.
+- Bir xil matn qayta kelsa → yangi Issue emas (skip).
 
 ---
 
@@ -157,6 +161,7 @@ Self-host = ko'p maxfiy kalit. Markazlashtirilgan boshqaruv:
 
 | Maxfiy | Qayerda | Kim ishlatadi |
 |--------|---------|---------------|
+| Telegram bot token | `.env` (gitignore) | ingest poll (`@brodyone_bot`) |
 | Plane/Docmost API token | `.env` (gitignore) / Docker secret | PO, PM agentlar |
 | GitLab PAT (scoped) | `.env` / CI variable | Dev crew, QA, DevOps |
 | Mailcow IMAP/SMTP cred | `.env` / Docker secret | ingest-worker, Marketing |
@@ -282,7 +287,7 @@ hermes-adlc/
 |------|--------|------|-------|
 | **−1. Infra** | 3-server self-host (Plane/Docmost/GitLab/Mailcow) + Caddy + backup | — | ✅ DONE (`selfhost/`) |
 | **0. Setup** | Plane/Docmost/GitLab/Mailcow MCP ulanish (tayyor MCP, config+token) + repo skeleton | 1 kun | ⏭ keyingi |
-| **1. PO agent** | Email(Mailcow)→Plane Issue (gate + dedup bilan) | 1-2 kun | |
+| **1. PO agent** | Telegram→Plane Issue (gate + dedup bilan) | 1-2 kun | 🔨 ingest qurildi |
 | **2. PM agent** | Issue→sub-issue breakdown | 1 kun | |
 | **3. Dev crew** | task→TDD kod→MR (1 til bilan boshlash) | 3-5 kun | |
 | **4. QA + review** | GitLab CI test + AI review gate | 2 kun | |
@@ -290,7 +295,7 @@ hermes-adlc/
 | **6. Hermes orchestrator** | uchidan-uchiga oqim, gate'lar, observability | 3 kun | |
 | **7. Design + Marketing** | Pencil + launch agentlari | keyin | |
 
-**MVP = Faza 0-4** (Email→Plane→PO→PM→Dev→MR→QA). Bu allaqachon haqiqiy 80/20 beradi. Infra (Faza −1) tugadi — keyingi qadam: integ spec + MCP ulanish (Faza 0, tayyor MCP'lar bilan ~1 kun).
+**MVP = Faza 0-4** (Telegram→Plane→PO→PM→Dev→MR→QA). Bu allaqachon haqiqiy 80/20 beradi. Infra (Faza −1) tugadi — keyingi qadam: integ spec + MCP ulanish (Faza 0, tayyor MCP'lar bilan ~1 kun).
 
 ---
 
@@ -299,7 +304,7 @@ hermes-adlc/
 - **Gate'larni o'tkazib yubormang:** merge va prod deploy — DOIM human. AI o'zi merge qilmasin.
 - **MCP versiya mosligi:** tayyor MCP'lar (Plane/Docmost/GitLab/Mailcow) self-host versiyaga mos bo'lishi shart — API o'zgarsa MCP buzilishi mumkin. Pin qilingan versiya ishlat.
 - **Token narxi:** parallel crew qimmat. Workflow tool bilan boshqarib, kerakli joyda model tier tanlang.
-- **Plane spam:** PO agent har emailni Issue qilmasin — dedup/fingerprint filtri majburiy (§4.2).
+- **Plane spam:** PO agent har xabarni Issue qilmasin — dedup/fingerprint filtri majburiy (§4.2).
 - **Konflikt:** parallel dev = worktree isolation majburiy.
 - **Secret oqishi:** self-host token'lar `.env`/Docker secret'da, hech qachon repo yoki Docmost'da (§4.5).
 - **Self-host uptime:** server o'lsa butun pipeline to'xtaydi — backup + monitoring + (kelajakda) HA kerak.
