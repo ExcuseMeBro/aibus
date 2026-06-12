@@ -1,5 +1,7 @@
 # ✅ DONE
 
+- [x] 🟢 🚀 Observability: structured JSONL log + stuck-issue monitor + escalation; wired into pipeline (commit 0b3544d)
+
 - [x] 🟠 📐 Hermes ADLC: to'liq arxitektura design → `~/hermes-adlc/ARCHITECTURE.md`
 - [x] 🟠 🔨 Plane + Docmost self-host: compose + nginx + SSL + backup → `~/selfhost/`
 - [x] 🟠 🔨 Self-host 3-server (Plane+Docmost / GitLab / Mailcow) + Caddy + DNS + backup → `~/selfhost/`

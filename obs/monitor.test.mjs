@@ -21,3 +21,13 @@ test('terminal (staged) issue never stuck even if old', () => {
   const issues = [{ id: 'ISS-3', state: 'staged', ts: hourAgo }]
   assert.equal(findStuck(issues, { maxAgeMs: 30 * 60 * 1000, now }).length, 0)
 })
+
+test('issue with missing/bad ts is treated as stuck', () => {
+  const issues = [{ id: 'ISS-4', state: 'in_dev' }]
+  assert.equal(findStuck(issues, { maxAgeMs: 30 * 60 * 1000, now }).length, 1)
+})
+
+test('issue aged exactly maxAgeMs is not stuck (strict >)', () => {
+  const issues = [{ id: 'ISS-5', state: 'in_dev', ts: '2026-06-12T11:30:00.000Z' }]
+  assert.equal(findStuck(issues, { maxAgeMs: 30 * 60 * 1000, now }).length, 0)
+})

@@ -3,7 +3,7 @@ import { escalate } from '../obs/escalate.mjs'
 // One transition of an issue through the ADLC, using adapters + agent fns.
 // Pure orchestration: all side effects go through adapters; agents are injected.
 export async function advance(issue, adapters, agents) {
-  const { plane, repo, ci, notify } = adapters
+  const { plane, repo, ci } = adapters
   switch (issue.state) {
     case 'backlog': {
       const sub = await agents.pm(issue)
