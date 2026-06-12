@@ -87,20 +87,21 @@ Hermes only routes and runs the gates.
 
 ## 🚦 Status
 
-The first slice — **PO triage (Telegram → Plane issue)** — is being built with a
-fresh subagent per task and two-stage review (spec + code quality).
+The full MVP pipeline runs **end-to-end offline** in fake mode — no prod keys.
+External systems sit behind an adapter seam (`fake` now, real MCP later).
 
 | Component | State |
 |-----------|:---:|
-| `ingest/telegram.mjs` — filter + parse + offset | ✅ TDD, **live-verified** |
-| `ingest/dedup.mjs` — atomic, corruption-safe fingerprint set | ✅ TDD |
-| `ingest/poll.mjs` — poll glue (offset · dedup · emit) | ✅ live smoke |
-| `.claude/agents/po-agent.md` — PO triage subagent | ✅ |
-| `.claude/commands/hermes-ingest.md` — runner + Gate 1 | ✅ |
-| Plane MCP wiring + end-to-end | ⏸ awaiting Plane creds |
+| `ingest/*` — Telegram filter · parse · dedup · poll | ✅ TDD, **live-verified** |
+| `adapters/*` — plane · repo · ci · notify + factory seam | ✅ TDD |
+| `pipeline/*` — ADLC state machine + runner | ✅ TDD, **fake e2e** |
+| `.claude/agents/*` — po · pm · dev · qa · devops · design · marketing | ✅ |
+| `.claude/commands/hermes-{ingest,run}.md` — orchestrators + gates | ✅ |
+| Real MCP wiring (`HERMES_MODE=real`) | ⏸ awaiting prod creds |
 
-> ✅ A real `/task` message to `@brodyone_bot` already flows through filter →
-> signal → dedup, end to end. Only the Plane write is left to wire.
+> ✅ `HERMES_MODE=fake node pipeline/run.mjs <issueId>` drives a backlog issue
+> through plan → dev → CI → merge-gate against in-memory fakes. **26 tests green.**
+> Swapping in real Plane/GitLab is a single adapter impl behind the same interface.
 
 ---
 
@@ -160,9 +161,14 @@ aibus/
 │   ├── telegram.mjs          filter + parse + offset
 │   ├── dedup.mjs             atomic fingerprint seen-set
 │   └── poll.mjs              IO glue
+├── adapters/                 external-system seam (fake now, real MCP later)
+│   ├── plane.mjs repo.mjs ci.mjs notify.mjs
+│   └── index.mjs             getAdapters(HERMES_MODE)
+├── pipeline/                 ADLC state machine
+│   ├── stages.mjs pipeline.mjs run.mjs
 ├── .claude/
-│   ├── agents/po-agent.md    PO triage subagent
-│   └── commands/hermes-ingest.md   one ingest tick + Gate 1
+│   ├── agents/*.md           po · pm · dev · qa · devops · design · marketing
+│   └── commands/             hermes-ingest.md · hermes-run.md
 ├── selfhost/                 3-server infra (Plane/Docmost/GitLab/Mailcow)
 ├── docs/superpowers/
 │   ├── specs/                design docs
@@ -186,16 +192,14 @@ slash commands · Plane / Docmost / GitLab / Mailcow MCP · Telegram Bot API
 
 - [x] **−1 · Infra** — 3-server self-host stack + Caddy + backup
 - [x] **PO slice (ingest)** — Telegram → signal, live-verified
-- [ ] **0 · Setup** — wire Plane/Docmost/GitLab/Mailcow MCP (~1 day)
-- [ ] **1 · PO agent** — Telegram → Plane issue + Gate 1 (end-to-end)
-- [ ] **2 · PM agent** — issue → sub-task breakdown
-- [ ] **3 · Dev crew** — task → TDD code → MR
-- [ ] **4 · QA + review** — CI tests + AI review gate
-- [ ] **5 · DevOps** — CI/CD + staging auto-deploy + rollback
-- [ ] **6 · Hermes** — end-to-end orchestration + observability
-- [ ] **7 · Design + Marketing**
+- [x] **Fake pipeline** — adapters + state machine + agents + orchestrator, e2e offline
+- [~] **1–4 · PO→PM→Dev→QA→DevOps** — scaffolded & runnable in fake mode
+- [ ] **0 · Setup** — swap fake adapters for real Plane/Docmost/GitLab/Mailcow MCP
+- [ ] **6 · Hermes** — observability + escalation hardening
+- [ ] **7 · Design + Marketing** — wire Pencil + launch agents
 
-**MVP = phases 0–4** (Telegram → Plane → PO → PM → Dev → MR → QA).
+**MVP = phases 0–4** (Telegram → Plane → PO → PM → Dev → MR → QA) —
+*logic complete in fake mode; phase 0 swaps in real backends.*
 
 ---
 
