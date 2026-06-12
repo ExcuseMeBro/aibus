@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes ADLC — Presentation</title>
+<style>
+  :root{
+    --bg:#0a0c14; --bg2:#10131f; --card:#161a29; --line:#262c40;
+    --ink:#eef1fa; --mut:#9aa3bd; --dim:#646d8a;
+    --a:#7c5cff; --a2:#22d3ee; --g:#34d399; --y:#fbbf24; --r:#fb7185;
+    --grad:linear-gradient(135deg,#7c5cff,#22d3ee);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  /* progress + nav */
+  #bar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:50;transition:width .2s}
+  #dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:10px}
+  #dots a{width:9px;height:9px;border-radius:50%;background:#2a3150;transition:.2s;display:block}
+  #dots a.on{background:var(--a);transform:scale(1.5);box-shadow:0 0 12px var(--a)}
+  #count{position:fixed;left:18px;bottom:16px;z-index:40;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+  .hint{position:fixed;right:18px;bottom:16px;z-index:40;color:var(--dim);font-size:12px}
+  /* slides */
+  section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:72px max(5vw,28px);position:relative;border-bottom:1px solid #11141f;scroll-snap-align:start}
+  main{scroll-snap-type:y proximity}
+  h1,h2,h3{line-height:1.15;margin:0 0 .5em}
+  h1{font-size:clamp(34px,6vw,72px);letter-spacing:-.02em}
+  h2{font-size:clamp(26px,4vw,44px);letter-spacing:-.01em}
+  .kick{color:var(--a2);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;margin-bottom:14px}
+  .lead{color:var(--mut);font-size:clamp(17px,2vw,21px);max-width:60ch}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .wrap{width:100%;max-width:1100px;margin:0 auto}
+  .grid{display:grid;gap:18px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .card h3{font-size:18px;margin-bottom:8px}
+  .card p{color:var(--mut);margin:0;font-size:15px}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:#0e1220}
+  .pill.g{color:var(--g);border-color:#1d4d3a}.pill.y{color:var(--y);border-color:#574316}.pill.r{color:var(--r);border-color:#5a2730}.pill.b{color:var(--a2);border-color:#15455a}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#0e1220;color:var(--a2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  tr:last-child td{border-bottom:none}
+  td b{color:var(--ink)} .mut{color:var(--mut)}
+  code{background:#0e1220;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;color:#c9d2ff}
+  .big{font-size:clamp(40px,7vw,90px);font-weight:800;letter-spacing:-.03em;line-height:1}
+  .stat{font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-.02em}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px}
+  .node{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;position:relative}
+  .node .s{font-weight:700;font-size:15px}.node .d{color:var(--dim);font-size:12px;margin-top:3px}
+  .node .gate{position:absolute;top:-10px;right:-8px;font-size:15px}
+  .arrow{align-self:center;color:var(--dim);font-size:20px}
+  ul.clean{list-style:none;padding:0;margin:0}ul.clean li{padding:7px 0 7px 26px;position:relative;color:var(--mut)}
+  ul.clean li::before{content:"▸";position:absolute;left:0;color:var(--a2)}
+  .tag{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+  .foot{position:absolute;bottom:22px;left:max(5vw,28px);color:var(--dim);font-size:12px}
+  /* matrix */
+  .mx{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;font-size:13px}
+  .mx .lbl{color:var(--dim);display:flex;align-items:center;justify-content:center;text-align:center;padding:6px}
+  .cell{border-radius:10px;padding:10px;min-height:74px;border:1px solid var(--line);font-size:12.5px}
+  .lo{background:#10231a;border-color:#1d4d3a}.md{background:#231d10;border-color:#574316}.hi{background:#23121a;border-color:#5a2730}
+  .axis{writing-mode:vertical-rl;transform:rotate(180deg);color:var(--dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  @media print{section{min-height:auto;page-break-after:always;border:none}#dots,#count,.hint,#bar{display:none}}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav id="dots"></nav>
+<div id="count"></div>
+<div class="hint">↑ ↓ / scroll · <b>F</b> fullscreen</div>
+<main>
+
+<!-- 1 COVER -->
+<section data-t="Hermes">
+  <div class="wrap">
+    <div class="kick">AI-Agent SDLC Orchestration</div>
+    <h1>🪽 <span class="grad">Hermes ADLC</span></h1>
+    <p class="lead" style="font-size:clamp(19px,2.4vw,26px)">Dasturiy ta'minotni <b>80% AI agentlar</b> quradi.
+      Siz faqat <b>20%</b> — qaror nuqtalarida turasiz. Bitta Telegram xabari → tayyor, testlangan kod.</p>
+    <div class="grid g4" style="margin-top:34px">
+      <div class="card"><div class="stat grad">80/20</div><p>AI / inson mehnati</p></div>
+      <div class="card"><div class="stat">52 ✓</div><p>avtomatik test (0 fail)</p></div>
+      <div class="card"><div class="stat">7</div><p>role agent</p></div>
+      <div class="card"><div class="stat">100%</div><p>self-hosted</p></div>
+    </div>
+  </div>
+  <div class="foot">github.com/ExcuseMeBro/aibus · 2026</div>
+</section>
+
+<!-- 2 PROBLEM (non-tech) -->
+<section data-t="Muammo">
+  <div class="wrap">
+    <div class="kick">Muammo</div>
+    <h2>Software qurish <span class="grad">sekin, qimmat, qo'lda</span></h2>
+    <p class="lead">Bir feature: g'oya → ticket → reja → dizayn → kod → test → review → deploy → e'lon. Har qadam odam kutadi. Ko'p kutish, ko'p uzatish, ko'p xato.</p>
+    <div class="grid g3" style="margin-top:28px">
+      <div class="card"><div class="tag">Bugun</div><h3>Ko'p qo'l mehnat</h3><p>Har bosqichda odam — yozadi, kutadi, uzatadi. Vaqtning 80% jarayonga ketadi.</p></div>
+      <div class="card"><div class="tag">Bugun</div><h3>Kontekst yo'qoladi</h3><p>Ticket → kod → test orasida ma'lumot tushib qoladi. Qayta so'rash, qayta tushuntirish.</p></div>
+      <div class="card"><div class="tag">Bugun</div><h3>SaaS qaramlik</h3><p>Jira, GitHub, Confluence — oylik to'lov, ma'lumot tashqarida, lock-in.</p></div>
+    </div>
+    <p class="lead" style="margin-top:26px">❓ <b>Agar 80% ishni AI qilsa-chi?</b> Odam faqat muhim qarorlarda tursa?</p>
+  </div>
+</section>
+
+<!-- 3 SOLUTION + 80/20 donut -->
+<section data-t="Yechim">
+  <div class="wrap grid g2" style="align-items:center">
+    <div>
+      <div class="kick">Yechim</div>
+      <h2>Hermes = <span class="grad">bosh orkestrator</span></h2>
+      <p class="lead">Signal keladi (Telegram xabari). Hermes uni to'g'ri <b>role agent</b>ga uzatadi: Product Owner, Project Manager, Dev, QA, DevOps. Har biri o'z ishini bajaradi, navbatdagiga beradi.</p>
+      <ul class="clean" style="margin-top:14px">
+        <li><b>AI 100%</b> qiladi: triage, reja, kod, test, staging</li>
+        <li><b>Siz</b> faqat 4 gate: roadmap · dizayn · merge · prod</li>
+        <li>Hammasi <b>self-hosted</b> — Plane, GitLab, Docmost, Mailcow</li>
+      </ul>
+    </div>
+    <div style="text-align:center">
+      <svg viewBox="0 0 220 220" width="270" height="270" style="max-width:100%">
+        <circle cx="110" cy="110" r="80" fill="none" stroke="#222a40" stroke-width="34"/>
+        <circle cx="110" cy="110" r="80" fill="none" stroke="url(#gr)" stroke-width="34"
+          stroke-dasharray="402 502" stroke-dashoffset="0" transform="rotate(-90 110 110)" stroke-linecap="butt"/>
+        <defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+        <text x="110" y="103" text-anchor="middle" fill="#eef1fa" font-size="38" font-weight="800">80%</text>
+        <text x="110" y="128" text-anchor="middle" fill="#9aa3bd" font-size="13">AI agentlar</text>
+      </svg>
+      <div style="margin-top:8px"><span class="swatch" style="background:#7c5cff"></span>AI 80% &nbsp; <span class="swatch" style="background:#222a40"></span>Inson 20%</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 HOW IT WORKS pipeline -->
+<section data-t="Oqim">
+  <div class="wrap">
+    <div class="kick">Qanday ishlaydi</div>
+    <h2>Signal → tayyor kod, <span class="grad">9 bosqich</span></h2>
+    <div class="flow" style="margin:24px 0">
+      <div class="node"><div class="s">📨 Signal</div><div class="d">Telegram</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🟢</div><div class="s">PO</div><div class="d">triage + AC</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🟢</div><div class="s">PM</div><div class="d">sub-task</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🟢</div><div class="s">Design</div><div class="d">UI bo'lsa</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="s">Dev</div><div class="d">TDD kod</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🟡</div><div class="s">QA</div><div class="d">CI test</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🔴</div><div class="s">Merge</div><div class="d">MR</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🔴</div><div class="s">DevOps</div><div class="d">staging</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="gate">🟢</div><div class="s">Marketing</div><div class="d">release</div></div>
+    </div>
+    <div class="grid g3">
+      <div class="card"><span class="pill r">🔴 Doim inson</span><p style="margin-top:10px">Merge va prod deploy — AI hech qachon o'zi qilmaydi.</p></div>
+      <div class="card"><span class="pill y">🟡 Shartli</span><p style="margin-top:10px">Test PASS → avtomatik o'tadi. FAIL → sizga eskalatsiya.</p></div>
+      <div class="card"><span class="pill g">🟢 Batch</span><p style="margin-top:10px">Kuniga 1× hammasini ko'rib tasdiqlaysiz — real 20% vaqt.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 AGENTS -->
+<section data-t="Agentlar">
+  <div class="wrap">
+    <div class="kick">Jamoa</div>
+    <h2>7 role agent + Hermes</h2>
+    <table>
+      <tr><th>Agent</th><th>Vazifa</th><th>Chiqish</th><th>Inson gate</th></tr>
+      <tr><td><b>Hermes</b></td><td>Orkestrator / router</td><td>marshrutlash</td><td>—</td></tr>
+      <tr><td><b>PO</b></td><td>Triage, prioritet, AC</td><td>Plane Issue</td><td><span class="pill g">🟢 roadmap</span></td></tr>
+      <tr><td><b>PM</b></td><td>Reja, breakdown</td><td>sub-tasklar</td><td><span class="pill g">🟢 reja</span></td></tr>
+      <tr><td><b>Design</b></td><td>UI prototip</td><td>Figma/Pencil</td><td><span class="pill g">🟢 dizayn</span></td></tr>
+      <tr><td><b>Dev</b></td><td>TDD kod yozish</td><td>Merge Request</td><td><span class="pill r">🔴 merge</span></td></tr>
+      <tr><td><b>QA</b></td><td>Test + review</td><td>verdict</td><td><span class="pill y">🟡 fail→inson</span></td></tr>
+      <tr><td><b>DevOps</b></td><td>Deploy</td><td>staging/prod</td><td><span class="pill r">🔴 prod</span></td></tr>
+      <tr><td><b>Marketing</b></td><td>Release notes</td><td>landing/post</td><td><span class="pill g">🟢 publish</span></td></tr>
+    </table>
+    <p class="mut" style="margin-top:14px;font-size:14px">Har agent = alohida system prompt + cheklangan tool + aniq "Definition of Done". Izolyatsiyalangan kontekst.</p>
+  </div>
+</section>
+
+<!-- 6 ADAPTER SEAM (key idea) -->
+<section data-t="Adapter">
+  <div class="wrap">
+    <div class="kick">Asosiy g'oya · "prod keysiz qanday qurdik"</div>
+    <h2>Adapter seam — <span class="grad">rozetka adapteri</span></h2>
+    <p class="lead">Agentlar tashqi tizimga to'g'ridan-to'g'ri emas, <b>adapter</b> orqali ulanadi. Bugun <b>fake/local</b> (offline), ertaga <b>real MCP</b> — bitta almashtirish, logika tegmaydi.</p>
+    <div class="grid g3" style="margin-top:22px">
+      <div class="card" style="border-color:#1d4d3a"><span class="pill g">FAKE</span><h3 style="margin-top:10px">In-memory</h3><p>Issue/MR/CI hammasi <code>.json</code> faylda. Test + demo. <b>Hozir ishlaydi.</b></p></div>
+      <div class="card" style="border-color:#574316"><span class="pill y">LOCAL</span><h3 style="margin-top:10px">Real, credsiz</h3><p>Haqiqiy <code>git</code> + haqiqiy <code>node --test</code> sandbox'da. Kod chindan quriladi.</p></div>
+      <div class="card" style="border-color:#15455a"><span class="pill b">REAL</span><h3 style="margin-top:10px">Live MCP</h3><p>Plane / GitLab / Docmost / Mailcow. Creds kelganda <code>HERMES_MODE=real</code>.</p></div>
+    </div>
+    <p class="mut" style="margin-top:18px;font-size:14px"><b>Non-tech tushuntirish:</b> telefon zaryadkasi bir xil — faqat rozetka adapteri o'zgaradi (UK/EU/US). Bizning "telefon" = pipeline; "adapter" = qaysi tizimga ulanish. Telefon o'zgarmaydi.</p>
+  </div>
+</section>
+
+<!-- 7 STATUS + test growth chart -->
+<section data-t="Holat">
+  <div class="wrap">
+    <div class="kick">Hozir nima ishlaydi</div>
+    <h2>Qurildi + <span class="grad">live isbotlandi</span></h2>
+    <div class="grid g2" style="align-items:center">
+      <div>
+        <ul class="clean">
+          <li><b>Telegram ingest</b> — real xabar → signal (live tasdiq)</li>
+          <li><b>Pipeline</b> — backlog→plan→dev→QA→merge gate, offline e2e</li>
+          <li><b>Real dev (credsiz)</b> — agent <code>slugify</code> ni TDD bilan yozdi, 7/7 green, real git commit</li>
+          <li><b>Observability</b> — log + qotgan-issue monitor + eskalatsiya</li>
+          <li><b>52 test</b> · 13+ commit · GitHub'da</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="tag" style="margin-bottom:14px">Test soni o'sishi (TDD)</div>
+        <svg viewBox="0 0 360 200" width="100%" height="200">
+          <g fill="none" stroke="#222a40" stroke-width="1">
+            <line x1="34" y1="170" x2="350" y2="170"/><line x1="34" y1="120" x2="350" y2="120"/>
+            <line x1="34" y1="70" x2="350" y2="70"/><line x1="34" y1="20" x2="350" y2="20"/>
+          </g>
+          <!-- bars: 15,25,36,43,52 ; scale: 60px=170 base, max60 -> height=val/60*150 -->
+          <g>
+            <rect x="46"  y="132.5" width="42" height="37.5" rx="4" fill="#3a3168"/>
+            <rect x="108" y="107.5" width="42" height="62.5" rx="4" fill="#4a3f8a"/>
+            <rect x="170" y="80"    width="42" height="90"   rx="4" fill="#5b4caa"/>
+            <rect x="232" y="62.5"  width="42" height="107.5" rx="4" fill="#6a57d4"/>
+            <rect x="294" y="40"    width="42" height="130"  rx="4" fill="url(#gr2)"/>
+            <defs><linearGradient id="gr2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs>
+          </g>
+          <g fill="#eef1fa" font-size="12" font-weight="700" text-anchor="middle">
+            <text x="67" y="124">15</text><text x="129" y="99">25</text><text x="191" y="72">36</text><text x="253" y="54">43</text><text x="315" y="32">52</text>
+          </g>
+          <g fill="#646d8a" font-size="9.5" text-anchor="middle">
+            <text x="67" y="184">ingest</text><text x="129" y="184">pipeline</text><text x="191" y="184">obs</text><text x="253" y="184">design</text><text x="315" y="184">real-dev</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 EDGE CASES -->
+<section data-t="Edge">
+  <div class="wrap">
+    <div class="kick">Edge case'lar · "nima sindi va qanday tutildi"</div>
+    <h2>Tutilgan <span class="grad">edge case'lar</span></h2>
+    <table>
+      <tr><th>Holat</th><th>Xavf</th><th>Yechim</th></tr>
+      <tr><td><b>Telegram privacy mode</b></td><td>Group'da spam / hamma xabar</td><td>Faqat <code>@bot</code>/<code>/task</code> — Telegram o'zi majburlaydi</td></tr>
+      <tr><td><b>Takror xabar (dedup)</b></td><td>Bir xil so'rov → ko'p Issue</td><td><code>sha256(chat+matn)</code> fingerprint, ko'rilganlar saqlanadi</td></tr>
+      <tr><td><b>Buzuq <code>seen.json</code></b></td><td>Reader crash, ingest to'xtaydi</td><td>try/catch → bo'sh set; atomik yozuv (tmp+rename)</td></tr>
+      <tr><td><b>getUpdates xato</b></td><td>Xabar yo'qoladi</td><td>Offset faqat muvaffaqiyatda advance (at-least-once)</td></tr>
+      <tr><td><b>CI fail</b></td><td>Sokin o'tib ketadi</td><td>→ <code>escalate()</code> log + inson notify, <code>in_dev</code>da qoladi</td></tr>
+      <tr><td><b>Node 22 <code>NODE_TEST_CONTEXT</code></b></td><td>Nested test sokin <b>skip</b> (soxta yashil!)</td><td>env strip — child test chindan ishlaydi</td></tr>
+      <tr><td><b>git rev-parse parent'ga yuradi</b></td><td>Sandbox commit'i <b>asosiy repo'ga</b> tushdi 🔴</td><td>To'g'ridan <code>.git</code> tekshiruvi → izolyatsiya + regression test</td></tr>
+      <tr><td><b>Qotgan issue</b></td><td>Bosqichda muddatsiz qoladi</td><td><code>findStuck</code> monitor → eskalatsiya; ts yo'q → stuck deb belgilanadi</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 9 RISK MATRIX -->
+<section data-t="Risk">
+  <div class="wrap">
+    <div class="kick">Risklar</div>
+    <h2>Risk matritsasi <span class="mut" style="font-size:.5em">(ta'sir × ehtimol)</span></h2>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <div class="axis" style="padding:0 4px">Ta'sir →</div>
+      <div style="flex:1">
+        <div class="mx">
+          <div></div><div class="lbl">Past ehtimol</div><div class="lbl">O'rta</div><div class="lbl">Yuqori ehtimol</div>
+          <div class="lbl">Yuqori</div>
+            <div class="cell md">Self-host server o'lsa pipeline to'xtaydi<br><span class="mut">→ backup + monitoring</span></div>
+            <div class="cell hi">AI o'zi merge/prod qilib yuborsa<br><span class="mut">→ 🔴 doim inson gate</span></div>
+            <div class="cell md">Soxta-yashil test (skip)<br><span class="mut">→ env fix + real CI</span></div>
+          <div class="lbl">O'rta</div>
+            <div class="cell lo">MCP versiya mosligi<br><span class="mut">→ pin versiya</span></div>
+            <div class="cell md">Token/secret oqishi<br><span class="mut">→ .env gitignore, scoped</span></div>
+            <div class="cell md">Plane spam (dedup yo'q)<br><span class="mut">→ fingerprint filtr</span></div>
+          <div class="lbl">Past</div>
+            <div class="cell lo">Worktree konflikt<br><span class="mut">→ izolyatsiya</span></div>
+            <div class="cell lo">Sandbox parent'ga oqish<br><span class="mut">→ tuzatildi + test</span></div>
+            <div class="cell md">Token narxi (parallel crew)<br><span class="mut">→ model tier tanlash</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="mut" style="margin-top:14px;font-size:13px"><span class="swatch" style="background:#10231a"></span>Past &nbsp;<span class="swatch" style="background:#231d10"></span>O'rta &nbsp;<span class="swatch" style="background:#23121a"></span>Yuqori — har biri uchun mitigatsiya bor.</p>
+  </div>
+</section>
+
+<!-- 10 PROS / CONS -->
+<section data-t="Pros/Cons">
+  <div class="wrap">
+    <div class="kick">Tarozi</div>
+    <h2>Pros <span class="mut">va</span> Cons</h2>
+    <div class="grid g2">
+      <div class="card" style="border-color:#1d4d3a">
+        <h3 style="color:var(--g)">✅ Afzalliklar</h3>
+        <ul class="clean">
+          <li><b>Tezlik</b> — 80% ish avtomatik, odam faqat qarorda</li>
+          <li><b>Self-hosted</b> — SaaS to'lov yo'q, ma'lumot o'zingizda</li>
+          <li><b>Adapter seam</b> — fake→real bitta almashtirish</li>
+          <li><b>TDD majburiy</b> — har kod testdan o'tadi</li>
+          <li><b>Xavfsiz</b> — merge/prod doim inson nazoratida</li>
+          <li><b>Kuzatiluvchi</b> — log + monitor + eskalatsiya, sokin fail yo'q</li>
+          <li><b>Offline isbotlangan</b> — creds'siz to'liq ishlaydi</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:#5a2730">
+        <h3 style="color:var(--r)">⚠️ Kamchiliklar / cheklovlar</h3>
+        <ul class="clean">
+          <li><b>Token narxi</b> — parallel agentlar qimmat</li>
+          <li><b>Self-host yuki</b> — server, backup, uptime sizda</li>
+          <li><b>Real MCP hali ulanmagan</b> — creds kutadi</li>
+          <li><b>Sessiya ochiq</b> (Path A) — 24/7 emas, hali</li>
+          <li><b>AI sifati</b> — murakkab ishda inson review shart</li>
+          <li><b>Yangi tizim</b> — jamoa o'rganishi kerak</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 ROADMAP -->
+<section data-t="Roadmap">
+  <div class="wrap">
+    <div class="kick">Yo'l xaritasi</div>
+    <h2>Qayerdamiz, qayerga</h2>
+    <table>
+      <tr><th>Faza</th><th>Natija</th><th>Holat</th></tr>
+      <tr><td>−1 · Infra</td><td>3-server self-host (Plane/GitLab/Docmost/Mailcow) + Caddy + backup</td><td><span class="pill g">✅ done</span></td></tr>
+      <tr><td>Ingest</td><td>Telegram → signal, dedup</td><td><span class="pill g">✅ live</span></td></tr>
+      <tr><td>Pipeline</td><td>Adapters + state machine + 7 agent + orchestrator</td><td><span class="pill g">✅ fake e2e</span></td></tr>
+      <tr><td>Real dev</td><td>Sandbox + LocalCI + local git, credsiz</td><td><span class="pill g">✅ isbot</span></td></tr>
+      <tr><td>Observability</td><td>Log + monitor + eskalatsiya</td><td><span class="pill g">✅ done</span></td></tr>
+      <tr><td><b>0 · Setup</b></td><td>fake/local → REAL MCP swap (creds kerak)</td><td><span class="pill y">⏭ keyingi</span></td></tr>
+      <tr><td>6 · Hardening</td><td>Jonli gate'lar bilan to'liq e2e + 24/7</td><td><span class="pill b">○ rejada</span></td></tr>
+    </table>
+    <p class="lead" style="margin-top:18px"><b>MVP = Faza 0–4</b> logikasi <span class="grad">tayyor</span> (fake mode). Faza 0 = real backend ulash, ~1 kun creds bilan.</p>
+  </div>
+</section>
+
+<!-- 12 CLOSE -->
+<section data-t="Yakun">
+  <div class="wrap" style="text-align:center">
+    <div class="kick" style="justify-content:center">Xulosa</div>
+    <h1>Telegram xabari → <span class="grad">tayyor kod</span></h1>
+    <p class="lead" style="margin:0 auto">SDLC factory tayyor va offline isbotlangan. Real backend ulash uchun faqat creds qoldi. Pipeline tegmaydi — adapter almashadi.</p>
+    <div class="grid g4" style="margin-top:34px">
+      <div class="card"><div class="stat grad">52✓</div><p>test, 0 fail</p></div>
+      <div class="card"><div class="stat">7</div><p>agent</p></div>
+      <div class="card"><div class="stat">3</div><p>mode: fake·local·real</p></div>
+      <div class="card"><div class="stat">80/20</div><p>AI / inson</p></div>
+    </div>
+    <p class="mut" style="margin-top:28px">🪽 <b>Hermes ADLC</b> · github.com/ExcuseMeBro/aibus</p>
+  </div>
+</section>
+
+</main>
+<script>
+  const secs=[...document.querySelectorAll('section')];
+  const dots=document.getElementById('dots');
+  secs.forEach((s,i)=>{const a=document.createElement('a');a.href='#';a.title=s.dataset.t;
+    a.onclick=e=>{e.preventDefault();s.scrollIntoView({behavior:'smooth'})};dots.appendChild(a)});
+  const da=[...dots.children];
+  const bar=document.getElementById('bar'),cnt=document.getElementById('count');
+  function upd(){
+    const y=window.scrollY,h=document.body.scrollHeight-innerHeight;
+    bar.style.width=(h>0?y/h*100:0)+'%';
+    let cur=0;secs.forEach((s,i)=>{if(s.getBoundingClientRect().top<innerHeight*0.5)cur=i});
+    da.forEach((d,i)=>d.classList.toggle('on',i===cur));
+    cnt.textContent=(cur+1)+' / '+secs.length+'  ·  '+secs[cur].dataset.t;
+  }
+  addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);upd();
+  addEventListener('keydown',e=>{
+    let cur=0;secs.forEach((s,i)=>{if(s.getBoundingClientRect().top<innerHeight*0.5)cur=i});
+    if(e.key==='ArrowDown'||e.key==='PageDown'||e.key===' '){e.preventDefault();secs[Math.min(cur+1,secs.length-1)].scrollIntoView({behavior:'smooth'})}
+    if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();secs[Math.max(cur-1,0)].scrollIntoView({behavior:'smooth'})}
+    if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+</script>
+</body>
+</html>

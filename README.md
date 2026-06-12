@@ -205,6 +205,6 @@ slash commands · Plane / Docmost / GitLab / Mailcow MCP · Telegram Bot API
 
 <div align="center">
 
-📖 [Architecture](ARCHITECTURE.md) · 🏗️ [Self-host](selfhost/README.md) · 📋 [Specs](docs/superpowers/specs/) · 🗂️ [Plans](docs/superpowers/plans/)
+🎤 [Presentation](docs/presentation/hermes-adlc.html) · 📖 [Architecture](ARCHITECTURE.md) · 🏗️ [Self-host](selfhost/README.md) · 📋 [Specs](docs/superpowers/specs/) · 🗂️ [Plans](docs/superpowers/plans/)
 
 </div>
