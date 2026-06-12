@@ -13,3 +13,5 @@
 - [x] 🟡 🔍 ARCHITECTURE.md: MCP holati to'g'irlandi — Plane/Docmost/Mailcow rasmiy MCP MAVJUD (custom emas), ulanish buyruqlari + Faza 0 yengillashtirildi
 - [x] 🟠 🚀 Repo push → github.com/ExcuseMeBro/aibus (main, .todos kiritildi, secret himoya)
 - [x] 🟠 📐 Hermes ADLC: arxitekturani qotirish + PO slice spec (Path A, Telegram ingest, real Plane MCP) → `docs/superpowers/specs/2026-06-12-hermes-po-slice-design.md`
+- [x] 🟠 🔨 Hermes ADLC: PO slice ingest (Telegram→signal) — TDD, live-verified, subagent-driven review → `ingest/`
+- [x] 🟠 🔨 Hermes MVP pipeline (fake mode, prod keysiz): adapters seam + state machine + 7 agent + orchestrator, e2e offline, 26 test → `adapters/` `pipeline/` `.claude/`
