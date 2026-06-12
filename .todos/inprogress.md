@@ -1,3 +1,3 @@
 # 🚧 IN PROGRESS
 
-- [ ] 🟠 📐 Hermes ADLC: arxitekturani qotirish (ochiq qarorlarni hal qilish → implement-ready)
+- [ ] 🟠 🔨 Hermes ADLC: PO slice — ingest+agent QURILDI (T1-4,6,7), Plane wiring (T5/8) creds kutadi

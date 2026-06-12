@@ -11,3 +11,5 @@
 - [x] 🟢 🔨 Self-host: backup script (Postgres dumps + volume) → `selfhost/backup/backup.sh`
 - [x] 🟠 🔍 Hermes ADLC: ARCHITECTURE.md to'liq review + kamchilik tuzatish (tool stack Plane/Docmost/GitLab/Mailcow ga moslandi + secrets/observability/ingest/dedup/deploy section qo'shildi)
 - [x] 🟡 🔍 ARCHITECTURE.md: MCP holati to'g'irlandi — Plane/Docmost/Mailcow rasmiy MCP MAVJUD (custom emas), ulanish buyruqlari + Faza 0 yengillashtirildi
+- [x] 🟠 🚀 Repo push → github.com/ExcuseMeBro/aibus (main, .todos kiritildi, secret himoya)
+- [x] 🟠 📐 Hermes ADLC: arxitekturani qotirish + PO slice spec (Path A, Telegram ingest, real Plane MCP) → `docs/superpowers/specs/2026-06-12-hermes-po-slice-design.md`
