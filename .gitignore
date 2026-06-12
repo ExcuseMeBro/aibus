@@ -9,3 +9,6 @@ codedb.snapshot
 .DS_Store
 
 # keep .todos board tracked (intentional)
+
+# runtime state
+.hermes/
