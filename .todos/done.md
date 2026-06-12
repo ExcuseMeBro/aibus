@@ -1,6 +1,7 @@
 # ✅ DONE
 
 - [x] 🟢 🚀 Observability: structured JSONL log + stuck-issue monitor + escalation; wired into pipeline (commit 0b3544d)
+- [x] 🟡 🚀 Real Dev (credsiz): sandbox workspace + LocalCI (real test exec) + LocalRepo (real git, izolyatsiya bug fix) + dev-agent jonli TDD; `local` mode — slugify e2e isbot, 52 test (commit b14fd34)
 
 - [x] 🟠 📐 Hermes ADLC: to'liq arxitektura design → `~/hermes-adlc/ARCHITECTURE.md`
 - [x] 🟠 🔨 Plane + Docmost self-host: compose + nginx + SSL + backup → `~/selfhost/`
