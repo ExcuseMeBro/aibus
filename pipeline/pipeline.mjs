@@ -1,3 +1,5 @@
+import { escalate } from '../obs/escalate.mjs'
+
 // One transition of an issue through the ADLC, using adapters + agent fns.
 // Pure orchestration: all side effects go through adapters; agents are injected.
 export async function advance(issue, adapters, agents) {
@@ -6,6 +8,7 @@ export async function advance(issue, adapters, agents) {
     case 'backlog': {
       const sub = await agents.pm(issue)
       plane.updateIssue(issue.id, { sub, state: 'planned' })
+      adapters.log?.('info', { action: 'transition', issueId: issue.id, from: 'backlog', to: 'planned' })
       return { stage: 'planned', sub }
     }
     case 'planned': {
@@ -16,9 +19,10 @@ export async function advance(issue, adapters, agents) {
       const result = await ci.runPipeline(mr) // await: real CI adapters are async
       if (result.status === 'pass') {
         plane.updateIssue(issue.id, { state: 'in_qa', mrId: mr.id })
+        adapters.log?.('info', { action: 'transition', issueId: issue.id, from: 'planned', to: 'in_qa', mrId: mr.id })
         return { stage: 'in_qa', mrId: mr.id, ci: result }
       }
-      notify.send('human', `CI failed for ${issue.id} (${mr.id}): ${result.report}`)
+      escalate(adapters, issue, `CI failed (${mr.id}): ${result.report}`)
       plane.updateIssue(issue.id, { state: 'in_dev', mrId: mr.id })
       return { stage: 'in_dev', mrId: mr.id, ci: result, escalated: true }
     }
