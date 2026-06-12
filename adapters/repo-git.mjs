@@ -1,4 +1,6 @@
 import { execSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { workspacePath } from '../dev/workspace.mjs'
 
 function git(cwd, args) {
@@ -12,7 +14,10 @@ export class LocalRepo {
   }
 
   _ensureRepo(cwd) {
-    try { git(cwd, 'rev-parse --git-dir') } catch {
+    // Check for the workspace's OWN .git directly — `git rev-parse` walks UP and
+    // would find an enclosing repo (e.g. Hermes itself), causing commits to land
+    // in the parent repo. A direct existence check keeps the workspace isolated.
+    if (!existsSync(join(cwd, '.git'))) {
       git(cwd, 'init -q')
       git(cwd, 'config user.email hermes@local')
       git(cwd, 'config user.name Hermes')
