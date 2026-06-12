@@ -7,6 +7,8 @@ import { FakePlane } from '../adapters/plane.mjs'
 import { FakeRepo } from '../adapters/repo.mjs'
 import { FakeCI } from '../adapters/ci.mjs'
 import { FakeNotify } from '../adapters/notify.mjs'
+import { FakeDesign } from '../adapters/design.mjs'
+import { FakeDocs } from '../adapters/docs.mjs'
 import { advance } from './pipeline.mjs'
 
 function ctx() {
@@ -51,5 +53,42 @@ test('in_qa CI fail → escalated, stays in_dev', async () => {
     const out = await advance(ad.plane.getIssue(issue.id), ad, failAgents)
     assert.equal(out.stage, 'in_dev')
     assert.equal(out.escalated, true)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('planned + needsUi → design prototype, state designed', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pipe-'))
+  const ad = { plane: new FakePlane(join(dir, 'p.json')), repo: new FakeRepo(join(dir, 'r.json')), ci: new FakeCI(), notify: new FakeNotify(join(dir, 'n.log')), design: new FakeDesign(join(dir, 'd.json')), docs: new FakeDocs(join(dir, 'docs.json')) }
+  const agents = { design: async () => ({ notes: 'dark mode' }), dev: async (s) => ({ branch: 'b', title: `feat: ${s.title}` }) }
+  try {
+    const issue = ad.plane.createIssue({ title: 'Login screen', state: 'planned', needsUi: true })
+    const out = await advance(ad.plane.getIssue(issue.id), ad, agents)
+    assert.equal(out.stage, 'designed')
+    assert.ok(out.design)
+    assert.equal(ad.plane.getIssue(issue.id).state, 'designed')
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('designed → dev → in_qa', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pipe-'))
+  const ad = { plane: new FakePlane(join(dir, 'p.json')), repo: new FakeRepo(join(dir, 'r.json')), ci: new FakeCI(), notify: new FakeNotify(join(dir, 'n.log')), design: new FakeDesign(join(dir, 'd.json')), docs: new FakeDocs(join(dir, 'docs.json')) }
+  const agents = { dev: async (s) => ({ branch: 'b', title: `feat: ${s.title}` }) }
+  try {
+    const issue = ad.plane.createIssue({ title: 'Login', state: 'designed', sub: [{ title: 'p' }], design: 'PROTO-1' })
+    const out = await advance(ad.plane.getIssue(issue.id), ad, agents)
+    assert.equal(out.stage, 'in_qa')
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('staged → marketing drafts release doc, state marketed', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pipe-'))
+  const ad = { plane: new FakePlane(join(dir, 'p.json')), repo: new FakeRepo(join(dir, 'r.json')), ci: new FakeCI(), notify: new FakeNotify(join(dir, 'n.log')), design: new FakeDesign(join(dir, 'd.json')), docs: new FakeDocs(join(dir, 'docs.json')) }
+  const agents = { marketing: async () => ({ releaseNotes: 'v1 shipped' }) }
+  try {
+    const issue = ad.plane.createIssue({ title: 'Login', state: 'staged' })
+    const out = await advance(ad.plane.getIssue(issue.id), ad, agents)
+    assert.equal(out.stage, 'marketed')
+    assert.ok(out.doc)
+    assert.equal(ad.plane.getIssue(issue.id).state, 'marketed')
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })

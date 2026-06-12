@@ -15,10 +15,10 @@ function save(path, data) {
 export class FakePlane {
   constructor(path = '.hermes/fake/plane.json') { this.path = path }
   _db() { return load(this.path) }
-  createIssue({ title, description = '', type = 'feature', priority = 'medium', state = 'triage', acceptance = [] }) {
+  createIssue({ title, description = '', type = 'feature', priority = 'medium', state = 'triage', acceptance = [], ...rest }) {
     const db = this._db()
     const id = `ISS-${++db.seq}`
-    db.issues[id] = { id, title, description, type, priority, state, acceptance, sub: [], ts: new Date().toISOString() }
+    db.issues[id] = { id, title, description, type, priority, state, acceptance, sub: [], ts: new Date().toISOString(), ...rest }
     save(this.path, db)
     return db.issues[id]
   }

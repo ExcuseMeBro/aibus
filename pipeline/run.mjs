@@ -2,7 +2,7 @@ import { advance } from './pipeline.mjs'
 
 // Drive an issue through automatic stages until it reaches a state that needs
 // a human gate (in_qa = merge gate, staged = done) or stops progressing.
-const GATE_STATES = new Set(['in_qa', 'ready_to_merge', 'staged', 'in_dev'])
+const GATE_STATES = new Set(['in_qa', 'ready_to_merge', 'staged', 'designed', 'in_dev'])
 
 export async function runToGate(issueId, adapters, agents, maxSteps = 10) {
   for (let i = 0; i < maxSteps; i++) {
@@ -25,6 +25,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const agents = {
     pm: async (i) => [{ title: `${i.title} - 1` }],
     dev: async (s) => ({ branch: `feature/${s.title}`.replace(/\s+/g, '-'), title: `feat: ${s.title}` }),
+    design: async () => ({ notes: 'fake prototype' }),
+    marketing: async () => ({ releaseNotes: 'fake release notes' }),
   }
   const id = process.argv[2]
   const out = await runToGate(id, ad, agents)
