@@ -1,5 +1,10 @@
 # ✅ DONE
 
+- [x] 🟡 🚀 docs/role-flow.md — SDLC↔ADLC moslik + guard matritsa + 8 Mermaid blok-sxema (umumiy pipeline + 7 role); enforcement bo'limi
+- [x] 🟠 🚀 7 agent .md ga `## Guard (chegara)` contract — kirish/chiqish(faqat)/TAQIQ(owner bilan)/tool; obs/guard.mjs KEY_OWNER bilan moslangan
+- [x] 🟠 🚀 Pipeline guard wiring — `guarded()` har role agent chiqishini assertRoleOutput orqali tekshiradi; buzilsa escalate (notify) + halt; 63/63 test
+- [x] 🟠 🚀 obs/guard.mjs runtime role-boundary guard (test-first, 10 test) — KEY_OWNER map + checkRoleOutput/assertRoleOutput; bir rol boshqasi yoki human-gate artefaktini qaytarsa rad etadi
+
 - [x] 🟢 🚀 Observability: structured JSONL log + stuck-issue monitor + escalation; wired into pipeline (commit 0b3544d)
 - [x] 🟡 🚀 Real Dev (credsiz): sandbox workspace + LocalCI (real test exec) + LocalRepo (real git, izolyatsiya bug fix) + dev-agent jonli TDD; `local` mode — slugify e2e isbot, 52 test (commit b14fd34)
 

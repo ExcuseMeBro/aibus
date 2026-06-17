@@ -25,3 +25,14 @@ Rules:
 - One issue per signal. Never create duplicates (caller already deduped).
 - Do not move the issue into a sprint/cycle — that is the PM agent + gate, later.
 - If the Plane MCP write fails, return `{ action: "error", reason }` — do NOT swallow it.
+
+## Guard (chegara) — `obs/guard.mjs` role=`po`
+- **Kirish:** bitta signal `{ chat_id, msg_id, from, text, ts }`.
+- **Chiqish (FAQAT shu kalitlar):** `action`, `issue_id`, `type`, `priority`, `title`, `reason`.
+- **TAQIQ (boshqa rol/gate artefakti — qaytarsang pipeline rad etadi):**
+  - `sub` → **PM** ishi (breakdown qilma).
+  - `branch` / `files` → **Dev** (kod yozma).
+  - `verdict` → **QA**. `staged` → **DevOps**.
+  - `merged` → human merge gate. `prod` → human prod gate. (hech qachon emas)
+  - Issue'ni sprint/cycle'ga **kiritma** — bu PM + gate ishi.
+- **Tool:** `Read`, `mcp__plane__*` (faqat `triage` state Issue yozish).

@@ -1,10 +1,24 @@
 import { escalate } from '../obs/escalate.mjs'
+import { assertRoleOutput } from '../obs/guard.mjs'
+
+// Run a role agent and enforce its boundary: if it returns an artifact owned by
+// another role or a human gate, escalate (don't swallow) and halt the transition.
+async function guarded(role, fn, adapters, issue) {
+  const out = await fn()
+  try {
+    assertRoleOutput(role, out)
+  } catch (e) {
+    escalate(adapters, issue, e.message)
+    throw e
+  }
+  return out
+}
 
 // Dev → MR → CI, shared by the no-UI path and the post-design path.
 async function runDev(issue, adapters, agents) {
   const { plane, repo, ci } = adapters
   const sub = issue.sub?.[0] || { title: issue.title }
-  const { branch, title } = await agents.dev(sub)
+  const { branch, title } = await guarded('dev', () => agents.dev(sub), adapters, issue)
   const mr = repo.openMR({ title, branch, issueId: issue.id })
   const result = await ci.runPipeline(mr)
   if (result.status === 'pass') {
@@ -22,7 +36,7 @@ export async function advance(issue, adapters, agents) {
   const { plane, design, docs } = adapters
   switch (issue.state) {
     case 'backlog': {
-      const sub = await agents.pm(issue)
+      const sub = await guarded('pm', () => agents.pm(issue), adapters, issue)
       plane.updateIssue(issue.id, { sub, state: 'planned' })
       adapters.log?.('info', { action: 'transition', issueId: issue.id, from: 'backlog', to: 'planned' })
       return { stage: 'planned', sub }
@@ -30,7 +44,7 @@ export async function advance(issue, adapters, agents) {
     case 'planned': {
       // UI issues detour through design (human gate) before dev.
       if (issue.needsUi && !issue.design) {
-        const d = await agents.design(issue)
+        const d = await guarded('design', () => agents.design(issue), adapters, issue)
         const proto = design.createPrototype({ issueId: issue.id, title: issue.title, notes: d?.notes || '' })
         plane.updateIssue(issue.id, { design: proto.ref, state: 'designed' })
         adapters.log?.('info', { action: 'transition', issueId: issue.id, from: 'planned', to: 'designed', design: proto.ref })
@@ -42,7 +56,7 @@ export async function advance(issue, adapters, agents) {
       return runDev(issue, adapters, agents)
     case 'staged': {
       // Post-ship: marketing drafts release notes (publish is a separate human gate).
-      const m = await agents.marketing(issue)
+      const m = await guarded('marketing', () => agents.marketing(issue), adapters, issue)
       const page = docs.createPage({ issueId: issue.id, title: `Release: ${issue.title}`, body: m?.releaseNotes || '' })
       plane.updateIssue(issue.id, { releaseDoc: page.pageId, state: 'marketed' })
       adapters.log?.('info', { action: 'transition', issueId: issue.id, from: 'staged', to: 'marketed', doc: page.pageId })

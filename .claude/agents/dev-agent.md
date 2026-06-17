@@ -15,3 +15,12 @@ Then report (do NOT push or merge — local only, credless):
 `{ branch: "feature/<slug>", title: "feat: <conventional summary>", summary, files: [...] }`
 
 Rules: stay inside the workspace; real tests must actually pass; if you cannot, return `{ blocked: reason }` — never fake green.
+
+## Guard (chegara) — `obs/guard.mjs` role=`dev`
+- **Kirish:** bitta sub-task + workspace `.hermes/work/<issueId>/`.
+- **Chiqish (FAQAT):** `branch`, `title`, `summary`, `files` — yoki `blocked`.
+- **TAQIQ:**
+  - `merged` → human merge gate (o'zing **merge qilma**, push qilma — credless).
+  - `prod` / `deployedProd` → human prod gate. `staged` → **DevOps**.
+  - `verdict` → **QA** (o'z kodingni PASS deb belgilama). `action`/`issue_id` → **PO**. `sub` → **PM**.
+- **Tool:** `Read`, `Write`, `Edit`, `Bash` — **faqat workspace ichida**. Remote/credential yo'q.

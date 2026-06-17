@@ -2,7 +2,7 @@
 
 > Auto-generated from the `.todos` board — do not edit by hand.
 
-**Total: 20**  ·  🚧 0 in progress  ·  📋 3 todo  ·  ✅ 17 done
+**Total: 24**  ·  🚧 0 in progress  ·  📋 3 todo  ·  ✅ 21 done
 
 ## By Status
 
@@ -10,8 +10,8 @@
 |:--|--:|
 | 🚧 In Progress | 0 |
 | 📋 Todo | 3 |
-| ✅ Done | 17 |
-| **Total** | **20** |
+| ✅ Done | 21 |
+| **Total** | **24** |
 
 ## Open Tasks by Priority
 

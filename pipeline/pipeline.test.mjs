@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { FakePlane } from '../adapters/plane.mjs'
@@ -53,6 +53,17 @@ test('in_qa CI fail → escalated, stays in_dev', async () => {
     const out = await advance(ad.plane.getIssue(issue.id), ad, failAgents)
     assert.equal(out.stage, 'in_dev')
     assert.equal(out.escalated, true)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('guard: dev leaking a merge escalates and halts', async () => {
+  const { ad, dir } = ctx()
+  const badAgents = { dev: async (s) => ({ branch: 'b', title: `feat: ${s.title}`, merged: true }) }
+  try {
+    const issue = ad.plane.createIssue({ title: 'X', state: 'planned', sub: [{ title: 'p' }] })
+    await assert.rejects(() => advance(ad.plane.getIssue(issue.id), ad, badAgents), /guard/)
+    const log = readFileSync(join(dir, 'n.log'), 'utf8')
+    assert.match(log, /needs you/) // surfaced, not swallowed
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
 
