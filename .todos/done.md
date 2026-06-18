@@ -1,5 +1,6 @@
 # ✅ DONE
 
+- [x] 🟡 🚀 ingest/gate-io.mjs — sendGate/ackCallback thin telegram IO (fetch-injectable, 3 test) + .env.example HERMES_ROLES + docs/role-flow.md §6 human gate layer; 79/79 test, pushed
 - [x] 🟠 🚀 ingest/gate.mjs — bidirectional telegram gate (test-first, 6 test): buildGate(inline_keyboard) + parseCallback(callback_query) + decide(authz); compact callback_data `g:<gate>:<id>:<a|r>`
 - [x] 🟠 🚀 ingest/roles.mjs — user_id→role authz (test-first, 7 test): parseRoles(env HERMES_ROLES)/roleOf/canApprove + GATE_ROLE map; admin bypass, fail-closed
 
