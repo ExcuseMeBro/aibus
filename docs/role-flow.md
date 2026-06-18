@@ -191,3 +191,44 @@ flowchart TD
    (sokin fail yo'q — §5.5 observability).
 
 Test: `obs/guard.test.mjs` (10) + `pipeline/pipeline.test.mjs` guard case.
+
+---
+
+## 6. Human gate layer — role-based telegram
+
+Gate'lar (🟢/🟡/🔴) endi telegramda **inline tugma** bilan tasdiqlanadi va faqat
+**o'sha gate egasi rol** bosa oladi. Bu agent guard'ining odam tarafidagi juftligi:
+agent o'z chiqishidan chiqib ketolmaydi, odam ham o'z rolidan tashqari gate'ni
+tasdiqlolmaydi.
+
+| Modul | Vazifa |
+|-------|--------|
+| `ingest/roles.mjs` | `HERMES_ROLES` env → `{user_id→role}`; `canApprove(map, userId, gate)`; `GATE_ROLE` (gate→rol) |
+| `ingest/gate.mjs` | `buildGate()` payload (inline_keyboard) · `parseCallback()` · `decide()` (parse+authz) |
+| `ingest/gate-io.mjs` | `sendGate()` / `ackCallback()` — telegram POST (fetch-injectable) |
+
+**Gate → rol (kim tasdiqlaydi):** `roadmap→po` · `plan→pm` · `design→design` ·
+`merge→reviewer` · `prod→devops` · `publish→marketing` · `admin` = hammasi.
+
+**Oqim:**
+
+```mermaid
+flowchart TD
+  PIPE([Pipeline gate'ga yetdi]) --> B[buildGate: text + ✅/❌ tugma]
+  B --> SEND[sendGate → telegram chat]
+  SEND --> WAIT([User tugma bosadi])
+  WAIT --> CB[callback_query: g:gate:id:a/r]
+  CB --> D{{decide: parse + canApprove}}
+  D -->|noto'g'ri rol| DENY[ackCallback: ⛔ ruxsat yo'q] --> WAIT
+  D -->|to'g'ri rol + approve| OKA[ackCallback ✅ → pipeline davom]
+  D -->|to'g'ri rol + reject| OKR[ackCallback ❌ → halt/qaytar]
+```
+
+**Config (`.env`):** `HERMES_ROLES={"<tg_user_id>":"<role>"}`. Misol
+`.env.example` da. Fail-closed: rolsiz user yoki noma'lum gate → rad.
+
+**Hali qurilmagan (keyingi slice):** real MCP ulanish (Faza 0, creds) + pipeline
+gate nuqtalarini `AskUserQuestion` o'rniga `sendGate`/`decide` ga ulash (orchestrator
+24/7 servis, arch §6-B). Modullar tayyor — wiring qoldi.
+
+Test: `ingest/roles.test.mjs` (7) + `ingest/gate.test.mjs` (6) + `ingest/gate-io.test.mjs` (3).

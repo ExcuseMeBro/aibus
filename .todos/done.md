@@ -1,5 +1,8 @@
 # ✅ DONE
 
+- [x] 🟠 🚀 ingest/gate.mjs — bidirectional telegram gate (test-first, 6 test): buildGate(inline_keyboard) + parseCallback(callback_query) + decide(authz); compact callback_data `g:<gate>:<id>:<a|r>`
+- [x] 🟠 🚀 ingest/roles.mjs — user_id→role authz (test-first, 7 test): parseRoles(env HERMES_ROLES)/roleOf/canApprove + GATE_ROLE map; admin bypass, fail-closed
+
 - [x] 🟠 🚀 Har agent .md ichiga o'z Blok-sxemasi (Mermaid) embed — 7 role, self-contained (Kirish→SDLC→Guard→Chiqish→Gate); 63/63 test (commit aa5605f)
 
 - [x] 🔴 🚀 Plane onboarding 403/CSRF fix — Caddyfile'ga `X-Forwarded-Proto`/`X-Forwarded-For`/`X-Forwarded-Host` (ikkilamchi proxy chain'da proto yo'qolmasin); INSTALL.md'ga CSRF origin ogohlantirish + troubleshooting bo'limi
