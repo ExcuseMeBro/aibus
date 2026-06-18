@@ -21,8 +21,13 @@ docs.adam.uz {
 plane.adam.uz {
 	encode zstd gzip
 	reverse_proxy 127.0.0.1:8082 {
-		# Plane uses websockets for live updates
+		# Plane uses websockets for live updates (Caddy auto-handles Upgrade).
 		header_up Host {host}
 		header_up X-Real-IP {remote_host}
+		# MUHIM: bularsiz Plane Django backend req'ni HTTP deb biladi ->
+		# onboarding POST'da CSRF/Origin tekshiruvi 403 beradi.
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
 	}
 }

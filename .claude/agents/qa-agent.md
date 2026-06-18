@@ -15,3 +15,18 @@ Pass is automatic; fail escalates to the human.
   - `branch` / `files` → **Dev** (kodni o'zing tuzatma — Dev'ga qaytar).
   - `staged` / `prod` → **DevOps**. `action`/`issue_id` → **PO**. `sub` → **PM**.
 - **Tool:** `Read`, `Bash`, `mcp__gitlab__*` — **read-only CI + diff** (yozish/merge yo'q).
+
+## Blok-sxema (ADLC: 🧪 verify · 🔍 review)
+
+```mermaid
+flowchart TD
+  IN([1 MR]) --> CI[GitLab CI ishga tushir]
+  CI --> DIFF[Diff review]
+  DIFF --> V{Verdict}
+  V -->|fail| FOUT([verdict:fail, findings]) --> ESCH([🟡 Dev ga qaytar / human])
+  V -->|pass| G{{Guard role=qa}}
+  G -->|merged/branch/staged bo'lsa| ESC([escalate + halt])
+  G -->|toza| OUT([verdict:pass, findings])
+  OUT --> GATE{{🔴 merge gate — human, eng muhim}}
+  GATE --> OPS[DevOps]
+```

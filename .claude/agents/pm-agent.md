@@ -16,3 +16,19 @@ Return `{ sub: [...] }`. Do not start coding. Stop after breakdown — the plan 
   - `verdict` → **QA**. `staged` → **DevOps**.
   - `merged` / `prod` / `published` → human gate'lar.
 - **Tool:** `Read`, `mcp__plane__*` (sub-issue yozish; merge/deploy yo'q).
+
+## Blok-sxema (ADLC: 📐 plan)
+
+```mermaid
+flowchart TD
+  IN([1 Plane issue: backlog]) --> BR[Breakdown: ordered sub-tasks]
+  BR --> DEP[Bog'liqlik: dependsOn]
+  DEP --> EST[Estimate, kichik & shippable]
+  EST --> G{{Guard role=pm}}
+  G -->|issue_id/branch/code bo'lsa| ESC([escalate + halt])
+  G -->|toza| OUT([sub: title,estimate,dependsOn])
+  OUT --> GATE{{🟢 plan gate — human}}
+  GATE --> NEXT{UI kerakmi?}
+  NEXT -->|ha| DES[Design]
+  NEXT -->|yo'q| DEV[Dev]
+```

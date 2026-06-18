@@ -24,3 +24,20 @@ Rules: stay inside the workspace; real tests must actually pass; if you cannot, 
   - `prod` / `deployedProd` → human prod gate. `staged` → **DevOps**.
   - `verdict` → **QA** (o'z kodingni PASS deb belgilama). `action`/`issue_id` → **PO**. `sub` → **PM**.
 - **Tool:** `Read`, `Write`, `Edit`, `Bash` — **faqat workspace ichida**. Remote/credential yo'q.
+
+## Blok-sxema (ADLC: 🔨 generate · TDD)
+
+```mermaid
+flowchart TD
+  IN([sub-task + workspace]) --> RED[1. Failing test yoz]
+  RED --> RUN1[node --test → RED tasdiqla]
+  RUN1 --> GREEN[2. Minimal kod → GREEN]
+  GREEN --> REF[3. Refactor, yashil saqla]
+  REF --> OK{Testlar haqiqatan PASS?}
+  OK -->|yo'q| BLK([return blocked: reason])
+  OK -->|ha| G{{Guard role=dev}}
+  G -->|merged/prod/verdict/push bo'lsa| ESC([escalate + halt])
+  G -->|toza| OUT([branch, title, summary, files])
+  OUT --> MR[Local MR — push/merge YO'Q, credless]
+  MR --> QA[QA ga]
+```

@@ -1,5 +1,7 @@
 # ✅ DONE
 
+- [x] 🔴 🚀 Plane onboarding 403/CSRF fix — Caddyfile'ga `X-Forwarded-Proto`/`X-Forwarded-For`/`X-Forwarded-Host` (ikkilamchi proxy chain'da proto yo'qolmasin); INSTALL.md'ga CSRF origin ogohlantirish + troubleshooting bo'limi
+
 - [x] 🟡 🚀 docs/role-flow.md — SDLC↔ADLC moslik + guard matritsa + 8 Mermaid blok-sxema (umumiy pipeline + 7 role); enforcement bo'limi
 - [x] 🟠 🚀 7 agent .md ga `## Guard (chegara)` contract — kirish/chiqish(faqat)/TAQIQ(owner bilan)/tool; obs/guard.mjs KEY_OWNER bilan moslangan
 - [x] 🟠 🚀 Pipeline guard wiring — `guarded()` har role agent chiqishini assertRoleOutput orqali tekshiradi; buzilsa escalate (notify) + halt; 63/63 test

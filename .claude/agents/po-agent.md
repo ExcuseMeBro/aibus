@@ -36,3 +36,20 @@ Rules:
   - `merged` → human merge gate. `prod` → human prod gate. (hech qachon emas)
   - Issue'ni sprint/cycle'ga **kiritma** — bu PM + gate ishi.
 - **Tool:** `Read`, `mcp__plane__*` (faqat `triage` state Issue yozish).
+
+## Blok-sxema (ADLC: 📝 spec)
+
+```mermaid
+flowchart TD
+  IN([signal: chat_id,text,ts]) --> C{Tasnif: bug/feature/debt/question}
+  C -->|small talk| IGN[return action:ignore]
+  C -->|actionable| DD{Dedup fingerprint}
+  DD -->|ko'rilgan| SKIP[skip]
+  DD -->|yangi| PRI[Prioritet: RICE/MoSCoW]
+  PRI --> WR[Plane Issue yoz: AC Given/When/Then, state=triage]
+  WR --> G{{Guard role=po}}
+  G -->|sub/branch/verdict bo'lsa| ESC([escalate + halt])
+  G -->|toza| OUT([action:created, issue_id, type, priority, title])
+  OUT --> GATE{{🟢 roadmap gate — human}}
+  GATE --> PM[PM ga]
+```

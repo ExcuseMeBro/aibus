@@ -14,3 +14,16 @@ You receive one issue needing UI. Produce a prototype + a short spec
   - `branch` / `files` → **Dev** (kod yozma). `verdict` → **QA**. `staged` → **DevOps**.
   - `merged` / `prod` / `published` → human gate'lar.
 - **Tool:** `Read`, `mcp__pencil__*` (prototip + screenshot; kod/Issue yo'q).
+
+## Blok-sxema (ADLC: 📐 plan)
+
+```mermaid
+flowchart TD
+  IN([UI issue]) --> PROTO[Pencil/Figma prototip]
+  PROTO --> SPEC[Qisqa spec / notes]
+  SPEC --> G{{Guard role=design}}
+  G -->|branch/code/sub bo'lsa| ESC([escalate + halt])
+  G -->|toza| OUT([prototypeRef, notes])
+  OUT --> GATE{{🟢 design gate — human}}
+  GATE --> DEV[Dev]
+```

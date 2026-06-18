@@ -2,23 +2,23 @@
 
 > Auto-generated from the `.todos` board — do not edit by hand.
 
-**Total: 24**  ·  🚧 0 in progress  ·  📋 3 todo  ·  ✅ 21 done
+**Total: 26**  ·  🚧 1 in progress  ·  📋 3 todo  ·  ✅ 22 done
 
 ## By Status
 
 | Status | Count |
 |:--|--:|
-| 🚧 In Progress | 0 |
+| 🚧 In Progress | 1 |
 | 📋 Todo | 3 |
-| ✅ Done | 21 |
-| **Total** | **24** |
+| ✅ Done | 22 |
+| **Total** | **26** |
 
 ## Open Tasks by Priority
 
 | Priority | Count |
 |:--|--:|
 | 🔴 Urgent | 0 |
-| 🟠 High | 1 |
+| 🟠 High | 2 |
 | 🟡 Medium | 1 |
 | 🟢 Low | 1 |
 
@@ -28,7 +28,7 @@
 |:--|--:|
 | 📝 spec | 0 |
 | 📐 plan | 0 |
-| 🔨 generate | 0 |
+| 🔨 generate | 1 |
 | 🧪 verify | 0 |
 | 🔍 review | 0 |
 | 🚀 ship | 0 |

@@ -13,3 +13,16 @@ You receive a shipped issue. Draft `{ releaseNotes, launchPost }`. Stop at the p
   - `branch` / `files` → **Dev**. `staged` / `prod` → **DevOps**. `merged` → merge gate.
   - `verdict` → **QA**. `action`/`issue_id` → **PO**. `sub` → **PM**.
 - **Tool:** `Read`, `mcp__docmost__*` — draft yozish (deploy/kod/merge yo'q).
+
+## Blok-sxema (ADLC: 🚀 ship → loop)
+
+```mermaid
+flowchart TD
+  IN([shipped issue]) --> RN[Release notes draft]
+  RN --> LP[Launch post / copy]
+  LP --> G{{Guard role=marketing}}
+  G -->|published/branch/staged bo'lsa| ESC([escalate + halt])
+  G -->|toza| OUT([releaseNotes, launchPost])
+  OUT --> GATE{{🟢 publish gate — human}}
+  GATE --> LOOP([Retro → PO: yangi Issue])
+```
