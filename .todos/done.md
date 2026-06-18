@@ -1,5 +1,7 @@
 # ✅ DONE
 
+- [x] 🟠 🚀 Har agent .md ichiga o'z Blok-sxemasi (Mermaid) embed — 7 role, self-contained (Kirish→SDLC→Guard→Chiqish→Gate); 63/63 test (commit aa5605f)
+
 - [x] 🔴 🚀 Plane onboarding 403/CSRF fix — Caddyfile'ga `X-Forwarded-Proto`/`X-Forwarded-For`/`X-Forwarded-Host` (ikkilamchi proxy chain'da proto yo'qolmasin); INSTALL.md'ga CSRF origin ogohlantirish + troubleshooting bo'limi
 
 - [x] 🟡 🚀 docs/role-flow.md — SDLC↔ADLC moslik + guard matritsa + 8 Mermaid blok-sxema (umumiy pipeline + 7 role); enforcement bo'limi
