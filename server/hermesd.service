@@ -1,0 +1,30 @@
+# hermesd — headless Telegram-driven Hermes orchestrator.
+# Install: sudo cp server/hermesd.service /etc/systemd/system/hermesd.service
+#          (edit User=, WorkingDirectory=, and the claude auth home below)
+#   sudo systemctl daemon-reload && sudo systemctl enable --now hermesd
+#   journalctl -u hermesd -f      # live logs
+
+[Unit]
+Description=hermesd — Telegram-driven ADLC orchestrator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hermes
+WorkingDirectory=/opt/aibus
+# .env holds TELEGRAM_BOT_TOKEN, HERMES_ROLES, PLANE_*, HERMES_CHAT_ID, HERMES_MODEL
+EnvironmentFile=/opt/aibus/.env
+Environment=HERMES_MODE=real
+# claude -p auth (Max subscription) lives in this user's home ~/.claude
+Environment=HOME=/home/hermes
+ExecStart=/usr/bin/node /opt/aibus/server/hermesd.mjs
+Restart=always
+RestartSec=5
+# hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/aibus/.hermes
+
+[Install]
+WantedBy=multi-user.target

@@ -97,7 +97,9 @@ External systems sit behind an adapter seam (`fake` now, real MCP later).
 | `pipeline/*` — ADLC state machine + runner | ✅ TDD, **fake e2e** |
 | `.claude/agents/*` — po · pm · dev · qa · devops · design · marketing | ✅ |
 | `.claude/commands/hermes-{ingest,run}.md` — orchestrators + gates | ✅ |
-| Real MCP wiring (`HERMES_MODE=real`) | ⏸ awaiting prod creds |
+| `server/hermesd.mjs` — headless **Telegram-driven** daemon (claude -p + real Plane + gate buttons) | ✅ TDD, **live-verified** |
+| `HERMES_MODE=real` — RealPlane REST + telegram notify | ✅ wired |
+| Real GitLab MR push + CI + deploy | ⏸ next slice |
 
 > ✅ `HERMES_MODE=fake node pipeline/run.mjs <issueId>` drives a backlog issue
 > through plan → dev → CI → merge-gate against in-memory fakes. **26 tests green.**
@@ -121,8 +123,11 @@ npm test                       # 15 passing
 # 4. one ingest tick (poll Telegram → fresh signals as JSON)
 set -a; . ./.env; set +a; node ingest/poll.mjs
 
-# 5. live Hermes (inside Claude Code)
+# 5a. live Hermes inside Claude Code (interactive gates)
 /loop 2m /hermes-ingest        # poll → PO triage → Gate 1, every 2 min
+
+# 5b. OR headless 24/7, everything over Telegram buttons (server deploy)
+HERMES_MODE=real node server/hermesd.mjs      # see docs/DEPLOY-TELEGRAM.md
 ```
 
 **Connect Plane MCP** (self-host):
