@@ -22,7 +22,7 @@ services:
         puma['worker_processes'] = 2
         sidekiq['max_concurrency'] = 10
         prometheus_monitoring['enable'] = false
-        # --- outbound mail via Mailcow (server3) ---
+        # --- outbound mail via Stalwart submission (server3) ---
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = 'mail.adam.uz'
         gitlab_rails['smtp_port'] = 587

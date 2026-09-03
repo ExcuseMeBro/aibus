@@ -118,7 +118,7 @@
       <ul class="clean" style="margin-top:14px">
         <li><b>AI 100%</b> qiladi: triage, reja, kod, test, staging</li>
         <li><b>Siz</b> faqat 4 gate: roadmap · dizayn · merge · prod</li>
-        <li>Hammasi <b>self-hosted</b> — Plane, GitLab, Docmost, Mailcow</li>
+        <li>Hammasi <b>self-hosted</b> — Plane, GitLab, Docmost, Stalwart + Bulwark</li>
       </ul>
     </div>
     <div style="text-align:center">
@@ -197,7 +197,7 @@
     <div class="grid g3" style="margin-top:22px">
       <div class="card" style="border-color:#1d4d3a"><span class="pill g">FAKE</span><h3 style="margin-top:10px">In-memory</h3><p>Issue/MR/CI hammasi <code>.json</code> faylda. Test + demo. <b>Hozir ishlaydi.</b></p></div>
       <div class="card" style="border-color:#574316"><span class="pill y">LOCAL</span><h3 style="margin-top:10px">Real, credsiz</h3><p>Haqiqiy <code>git</code> + haqiqiy <code>node --test</code> sandbox'da. Kod chindan quriladi.</p></div>
-      <div class="card" style="border-color:#15455a"><span class="pill b">REAL</span><h3 style="margin-top:10px">Live MCP</h3><p>Plane / GitLab / Docmost / Mailcow. Creds kelganda <code>HERMES_MODE=real</code>.</p></div>
+      <div class="card" style="border-color:#15455a"><span class="pill b">REAL</span><h3 style="margin-top:10px">Live MCP</h3><p>Plane / GitLab / Docmost / Stalwart. Creds kelganda <code>HERMES_MODE=real</code>.</p></div>
     </div>
     <p class="mut" style="margin-top:18px;font-size:14px"><b>Non-tech tushuntirish:</b> telefon zaryadkasi bir xil — faqat rozetka adapteri o'zgaradi (UK/EU/US). Bizning "telefon" = pipeline; "adapter" = qaysi tizimga ulanish. Telefon o'zgarmaydi.</p>
   </div>
@@ -334,7 +334,7 @@
     <h2>Qayerdamiz, qayerga</h2>
     <table>
       <tr><th>Faza</th><th>Natija</th><th>Holat</th></tr>
-      <tr><td>−1 · Infra</td><td>3-server self-host (Plane/GitLab/Docmost/Mailcow) + Caddy + backup</td><td><span class="pill g">✅ done</span></td></tr>
+      <tr><td>−1 · Infra</td><td>3-server self-host (Plane/GitLab/Docmost/Stalwart+Bulwark) + Caddy + backup</td><td><span class="pill y">🔄 cutover kutiladi</span></td></tr>
       <tr><td>Ingest</td><td>Telegram → signal, dedup</td><td><span class="pill g">✅ live</span></td></tr>
       <tr><td>Pipeline</td><td>Adapters + state machine + 7 agent + orchestrator</td><td><span class="pill g">✅ fake e2e</span></td></tr>
       <tr><td>Real dev</td><td>Sandbox + LocalCI + local git, credsiz</td><td><span class="pill g">✅ isbot</span></td></tr>

@@ -14,11 +14,13 @@ GitLab konteyneri 2222→22 ishlatadi, lekin aniqlik uchun host sshd 22'da qolsi
 ```bash
 cd /Users/bro/hermes-adlc/selfhost/server2-gitlab
 cp .env.example .env
-nano .env                       # GITLAB_SMTP_PASSWORD (Mailcow'dagi gitlab@adam.uz paroli)
+nano .env                       # GITLAB_SMTP_PASSWORD (Stalwart'dagi gitlab@adam.uz app paroli)
 docker compose up -d
 # Birinchi yuklash 3-5 daqiqa. Loglar:
 docker compose logs -f gitlab   # "gitlab Reconfigured!" kutiladi
 ```
+
+GitLab SMTP sozlamasi `mail.adam.uz:587` ga STARTTLS + login ishlatadi. Cutoverdan oldin Stalwart'da `gitlab@adam.uz` account/app parolini yarating va test xat yuboring.
 
 ## 3. Root parol
 ```bash

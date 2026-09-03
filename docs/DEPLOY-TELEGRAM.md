@@ -3,7 +3,7 @@
 Everything runs over Telegram: you send a task, PO/PM/dev/etc reasoning is done by
 Claude (`claude -p`, your Max subscription), and every human gate is an inline
 **✅ Approve / ❌ Reject** button. The self-host backends (Plane/Docmost/GitLab/
-Mailcow) are already up — this guide only stands up the **orchestrator daemon**.
+Stalwart + Bulwark) are already up — this guide only stands up the **orchestrator daemon**.
 
 ```
 Telegram  ──►  hermesd (systemd, 24/7)  ──►  Plane (REST)
@@ -147,7 +147,7 @@ sudo systemctl restart hermesd
 | PM plan · design · marketing (claude reasoning) | ✅ live |
 | Dev stage = MR **plan** (branch/title reasoning) | ✅ live (no code push yet) |
 | Real GitLab MR push + CI + staging/prod deploy | ⏭ next (roadmap) |
-| Docmost release-notes page · Mailcow email ingest | ⏭ next |
+| Docmost release-notes page · Stalwart IMAP/JMAP email ingest | ⏭ next |
 
 The dev stage currently produces the MR intent (branch + title) via Claude and
 advances to the merge gate; it does **not** yet push code to GitLab or run CI.
