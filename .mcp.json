@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "plane-aibus": {
+      "command": "/Users/bro/.local/bin/plane-mcp-server",
+      "args": ["stdio"],
+      "env": {
+        "PLANE_API_KEY": "!security find-generic-password -a bro -s aibus-plane-api-key -w",
+        "PLANE_WORKSPACE_SLUG": "adam",
+        "PLANE_BASE_URL": "https://plane.adam.uz"
+      },
+      "lifecycle": "lazy",
+      "requestTimeoutMs": 30000
+    },
+    "gitlab-aibus": {
+      "url": "https://gitlab.adam.uz/api/v4/mcp",
+      "auth": "oauth",
+      "lifecycle": "lazy",
+      "requestTimeoutMs": 30000
+    }
+  }
+}
