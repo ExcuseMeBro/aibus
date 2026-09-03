@@ -1,0 +1,71 @@
+name: aibus-mail
+
+services:
+  stalwart:
+    image: stalwartlabs/stalwart:v0.16.20@sha256:74ca4f7f6885fe302f38a99381f36a208547afce1033d8734d9e6d8d3eba7446
+    container_name: stalwart
+    restart: unless-stopped
+    hostname: ${MAIL_HOSTNAME:-mail.adam.uz}
+    environment:
+      STALWART_PUBLIC_URL: ${MAIL_PUBLIC_URL:-https://mail.adam.uz}
+      # Bootstrap/recovery only. Remove the value from .env after setup.
+      STALWART_RECOVERY_ADMIN: ${STALWART_RECOVERY_ADMIN:-}
+    ports:
+      - "25:25"       # SMTP
+      - "465:465"     # submissions (implicit TLS)
+      - "587:587"     # submission (STARTTLS)
+      - "143:143"     # IMAP + STARTTLS
+      - "993:993"     # IMAPS
+      - "110:110"     # POP3 + STARTTLS (optional clients)
+      - "995:995"     # POP3S (optional clients)
+      - "4190:4190"   # ManageSieve
+      - "127.0.0.1:8080:8080" # JMAP/admin via host Caddy only
+    volumes:
+      - stalwart-config:/etc/stalwart
+      - stalwart-data:/var/lib/stalwart
+
+  bulwark:
+    image: ghcr.io/bulwarkmail/webmail:1.9.2@sha256:0e8d1339277033b6569a76c6f8192396e6edd66fd917d64d9ed505e8b81dac6d
+    container_name: bulwark
+    restart: unless-stopped
+    depends_on:
+      - stalwart
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      JMAP_SERVER_URL: ${MAIL_PUBLIC_URL:-https://mail.adam.uz}
+      ALLOW_CUSTOM_JMAP_ENDPOINT: "false"
+      SESSION_SECRET: ${BULWARK_SESSION_SECRET:?set BULWARK_SESSION_SECRET in .env}
+      SETTINGS_SYNC_ENABLED: "true"
+      SETTINGS_DATA_DIR: /app/data/settings
+      ADMIN_CONFIG_DIR: /app/data/admin
+      ADMIN_STATE_DIR: /app/data/admin-state
+      TELEMETRY_DATA_DIR: /app/data/telemetry
+      BULWARK_TELEMETRY: "off"
+    ports:
+      - "127.0.0.1:3000:3000" # webmail via host Caddy only
+    volumes:
+      - bulwark-settings:/app/data/settings
+      - bulwark-admin:/app/data/admin
+      - bulwark-admin-state:/app/data/admin-state
+      - bulwark-telemetry:/app/data/telemetry
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  stalwart-config:
+    name: aibus-stalwart-config
+  stalwart-data:
+    name: aibus-stalwart-data
+  bulwark-settings:
+    name: aibus-bulwark-settings
+  bulwark-admin:
+    name: aibus-bulwark-admin
+  bulwark-admin-state:
+    name: aibus-bulwark-admin-state
+  bulwark-telemetry:
+    name: aibus-bulwark-telemetry

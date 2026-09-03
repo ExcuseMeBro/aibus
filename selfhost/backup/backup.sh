@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Backup — RUNS ON SERVER 1 (Plane + Docmost): postgres dumps + storage volumes.
-# GitLab (server2) and Mailcow (server3) have their OWN backup — see note at bottom.
+# GitLab (server2) and Stalwart + Bulwark (server3) have their OWN backups.
 # Cron misol (har kuni 03:00):
 #   0 3 * * * /Users/bro/hermes-adlc/selfhost/backup/backup.sh >> /var/log/selfhost-backup.log 2>&1
 set -euo pipefail
@@ -41,6 +41,7 @@ echo "[$(date)] backup done. size: $(du -sh "${DEST}" | cut -f1)"
 # SERVER 2 (GitLab):  sudo docker exec gitlab gitlab-backup create
 #   -> /var/lib/gitlab backups; cron: 0 2 * * * docker exec gitlab gitlab-backup create CRON=1
 #   + /etc/gitlab config'ni alohida nusxala (gitlab-secrets.json, gitlab.rb).
-# SERVER 3 (Mailcow): cd /opt/mailcow-dockerized && sudo ./helper-scripts/backup_and_restore.sh backup all
-#   cron: 0 2 * * * MAILCOW_BACKUP_LOCATION=/var/backups/mailcow .../backup_and_restore.sh backup all --delete-days 14
+# SERVER 3 (Stalwart + Bulwark):
+#   /opt/aibus/selfhost/server3-stalwart-bulwark/backup.sh
+#   cron: 0 2 * * * BACKUP_ROOT=/var/backups/aibus-mail /opt/aibus/selfhost/server3-stalwart-bulwark/backup.sh
 # ---------------------------------------------------------------------------

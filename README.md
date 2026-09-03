@@ -149,7 +149,7 @@ Everything runs on your own servers. No SaaS lock-in.
 | **Plane** | Jira | ✅ official | server1 |
 | **Docmost** | Confluence | ✅ official | server1 |
 | **GitLab CE** | GitHub | ✅ official | server2 |
-| **Mailcow** | Gmail | ✅ community | server3 |
+| **Stalwart + Bulwark** | Gmail / Mailcow | SMTP · IMAP · JMAP | server3 |
 
 Compose stacks, Caddy + Let's Encrypt, DNS records, and a backup script live in
 [`selfhost/`](selfhost/README.md).
@@ -174,7 +174,7 @@ aibus/
 ├── .claude/
 │   ├── agents/*.md           po · pm · dev · qa · devops · design · marketing
 │   └── commands/             hermes-ingest.md · hermes-run.md
-├── selfhost/                 3-server infra (Plane/Docmost/GitLab/Mailcow)
+├── selfhost/                 3-server infra (Plane/Docmost/GitLab/Stalwart+Bulwark)
 ├── docs/superpowers/
 │   ├── specs/                design docs
 │   └── plans/                implementation plans
@@ -186,7 +186,7 @@ aibus/
 ## 🛠️ Tech
 
 `Node ≥18 (ESM)` · `node:test` · zero runtime deps · Claude Code subagents +
-slash commands · Plane / Docmost / GitLab / Mailcow MCP · Telegram Bot API
+slash commands · Plane / Docmost / GitLab MCP · Stalwart SMTP/IMAP/JMAP · Telegram Bot API
 
 **Conventions:** all timestamps UTC ISO-8601 · secrets only in `.env` (gitignored)
 · TDD red→green · frequent commits.
@@ -195,11 +195,11 @@ slash commands · Plane / Docmost / GitLab / Mailcow MCP · Telegram Bot API
 
 ## 🗺️ Roadmap
 
-- [x] **−1 · Infra** — 3-server self-host stack + Caddy + backup
+- [~] **−1 · Infra** — Stalwart + Bulwark migration config tayyor; production cutover gate kutiladi
 - [x] **PO slice (ingest)** — Telegram → signal, live-verified
 - [x] **Fake pipeline** — adapters + state machine + agents + orchestrator, e2e offline
 - [~] **1–4 · PO→PM→Dev→QA→DevOps** — scaffolded & runnable in fake mode
-- [ ] **0 · Setup** — swap fake adapters for real Plane/Docmost/GitLab/Mailcow MCP
+- [ ] **0 · Setup** — swap fake adapters for real Plane/Docmost/GitLab plus Stalwart mail protocols
 - [ ] **6 · Hermes** — observability + escalation hardening
 - [ ] **7 · Design + Marketing** — wire Pencil + launch agents
 

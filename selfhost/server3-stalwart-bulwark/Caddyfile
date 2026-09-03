@@ -1,0 +1,21 @@
+# Host Caddy owns public HTTP/HTTPS. Stalwart keeps the mail-protocol TLS listeners.
+# Stalwart must obtain its mail certificate with DNS-01 (or use an uploaded cert),
+# because Caddy occupies TCP 443 and proxies Stalwart's HTTP listener on 8080.
+
+mail.adam.uz {
+	# Bulwark's browser-side JMAP client is cross-origin. Allow only its public
+	# origin instead of enabling Stalwart's global permissive-CORS switch.
+	@bulwark_origin header Origin https://webmail.adam.uz
+	header @bulwark_origin {
+		Access-Control-Allow-Origin "https://webmail.adam.uz"
+		Access-Control-Allow-Headers "Authorization, Content-Type, Accept, X-Requested-With"
+		Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS"
+		Vary "Origin"
+	}
+	reverse_proxy 127.0.0.1:8080
+}
+
+webmail.adam.uz {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3000
+}

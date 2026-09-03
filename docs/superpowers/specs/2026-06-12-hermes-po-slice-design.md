@@ -14,7 +14,7 @@ triaged Plane issue with acceptance criteria, behind a human gate. Proves the
 ingest → agent → shared-state → gate loop end-to-end before adding PM/Dev/QA.
 
 **Out of scope (later slices):** PM breakdown, Dev crew, QA, DevOps, Marketing,
-Docmost/GitLab/Mailcow wiring. This slice touches only Telegram + Plane.
+Docmost/GitLab/Stalwart wiring. This slice touches only Telegram + Plane.
 
 ## 2. Locked decisions
 

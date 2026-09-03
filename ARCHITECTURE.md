@@ -3,7 +3,7 @@
 > **Maqsad:** Whiteboard'dagi SDLC pipeline'ni AI agentlar bilan avtomatlashtirish.
 > **80/20 modeli:** 80% ishni AI agentlar qiladi, 20% — siz (faqat gate/qaror nuqtalarida).
 > **Hermes** = bosh orchestrator agent. Qolganlari = role sub-agentlar.
-> **Infra:** to'liq self-hosted (Plane / Docmost / GitLab / Mailcow) — `selfhost/` ga qarang.
+> **Infra:** to'liq self-hosted (Plane / Docmost / GitLab / Stalwart + Bulwark) — `selfhost/` ga qarang.
 
 ---
 
@@ -46,19 +46,19 @@ Har bir agent = alohida system prompt + cheklangan tool to'plami + aniq "Definit
 | Agent | Rol | Kirish | Chiqish | Tool'lar | Gate (human?) |
 |-------|-----|--------|---------|----------|---------------|
 | **Hermes** | Orchestrator | har qanday signal | role agentga marshrut | barcha MCP | — |
-| **PO** (Product Owner) | Triage, prioritet, acceptance criteria | raw muammo/feature | Plane Cycle/Issue + AC | Plane, Docmost, Mailcow | 🟢 Roadmapga qo'shishdan oldin |
+| **PO** (Product Owner) | Triage, prioritet, acceptance criteria | raw muammo/feature | Plane Cycle/Issue + AC | Plane, Docmost, Stalwart IMAP/JMAP | 🟢 Roadmapga qo'shishdan oldin |
 | **PM** (Project Manager) | Breakdown, reja, sprint | Epic/Module | Plane sub-issue + reja | Plane, Docmost | 🟢 Reja tasdiqlash |
 | **Backend** | Server kod | task | MR (merge request) | GitLab, IDE, CI | 🔴 MR merge |
 | **Frontend** | Web UI | task + design | MR | GitLab, Pencil/Figma | 🔴 MR merge |
 | **Mobile** | iOS/Android | task + design | MR | GitLab | 🔴 MR merge |
 | **Design** | UI/UX, prototip | task | Figma/Pencil + spec | Pencil MCP | 🟢 Design tasdiqlash |
-| **Marketing** | Copy, launch, GTM | release | landing, post, email | Web, Docmost, Mailcow | 🟢 Publish |
+| **Marketing** | Copy, launch, GTM | release | landing, post, email | Web, Docmost, Stalwart SMTP | 🟢 Publish |
 | **QA** | Test, review | MR | test natija + verdict | GitLab, CI, browser | 🟡 avtomatik, fail→human |
 | **DevOps** | CI/CD, deploy | merged kod | release | GitLab CI API, Git | 🔴 Prod deploy |
 
 🔴 = doim human gate · 🟡 = shartli (fail bo'lsa) · 🟢 = batch tasdiqlash (siz ko'rib o'tasiz)
 
-> **Eslatma — terminologiya mosligi:** Jira→Plane (Issue/Cycle/Module), Confluence→Docmost (page/space), GitHub→GitLab (MR=Merge Request, PR emas), Gmail→Mailcow (IMAP/SMTP). Hujjat davomida self-host nomlari ishlatiladi.
+> **Eslatma — terminologiya mosligi:** Jira→Plane (Issue/Cycle/Module), Confluence→Docmost (page/space), GitHub→GitLab (MR=Merge Request, PR emas), Gmail/Mailcow→Stalwart server + Bulwark web client. Hujjat davomida self-host nomlari ishlatiladi.
 
 ---
 
@@ -67,7 +67,7 @@ Har bir agent = alohida system prompt + cheklangan tool to'plami + aniq "Definit
 Whiteboard oqimi: `Futures → Plane → PO → PM → Dev → QA → DevOps → PM → PO → Release → loop`.
 
 ```
-[0] SIGNAL           Telegram (bot) / Email (Mailcow) / manual  → Hermes ingest
+[0] SIGNAL           Telegram (bot) / Email (Stalwart) / manual → Hermes ingest
                      │  (AI: 100%) — ingest mexanizmi: §4.1
 [1] PO TRIAGE        muammo? feature? bug? prioritet?
                      AI Plane Issue + acceptance criteria yozadi
@@ -113,22 +113,24 @@ Har bir tashqi tizim = MCP server. Agentlar tool orqali kiradi.
 | **Docmost** | ✅ rasmiy MCP (18 tool: page/space/comment) | spec, roadmap, retro docs | server1 |
 | **GitLab** | ✅ rasmiy MCP / `glab` CLI | branch, commit, MR, review | server2 |
 | **GitLab CI** | GitLab REST `/ci` | pipeline, deploy, status | server2 |
-| **Mailcow** | ✅ jamoaviy MCP (mcpmarket) | inbound→ticket, outbound notify | server3 |
+| **Stalwart** | Standart IMAP/SMTP/JMAP + Management API | inbound→ticket, outbound notify | server3 |
+| **Bulwark** | Hermes adapter emas; odamlar uchun JMAP web client | mail/calendar/contacts/files UI | server3 |
 | **Design** | ✅ Pencil MCP (mavjud) / Figma | prototip, screenshot | — |
 
-> **MCP reallik:** Plane/Docmost/GitLab/Mailcow uchun **tayyor MCP serverlar bor** — custom yozish shart emas, faqat ulanish + token. Faza 0 = config + scoped token, kod emas.
+> **Integratsiya realligi:** Plane, Docmost va GitLab MCP/API orqali ulanadi. Mail oqimi uchun alohida vendor MCP shart emas: Stalwart standart IMAP/SMTP/JMAP va Management API beradi; Bulwark esa faqat odamlar uchun web client.
 >
 > **Ulanish (self-host):**
 > - **Plane** — self-host → stdio transport, env: `x-api-key` (PAT) + `x-workspace-slug`. Yoki HTTP/PAT (CI/avtomatlashtirish uchun): `x-api-key` header.
 > - **Docmost** — `claude mcp add Docmost --transport http https://docs.DOMAIN/mcp --header "Authorization: Bearer <API_KEY>"`. MCP web app permission'larini hurmat qiladi (least-privilege tayyor).
 > - **GitLab** — rasmiy GitLab MCP yoki `glab` CLI, scoped PAT.
-> - **Mailcow** — jamoaviy MCP (mcpmarket), API key. Ingest trigger uchun §4.1 ga qarang (MCP = pull; signal push hali ham kerak).
+> - **Stalwart** — inbound uchun read-only IMAP/JMAP account, outbound uchun alohida SMTP app credential. Signal push/poll worker §4.1 dagi bir xil `signal` contract'iga map qiladi.
+> - **Bulwark** — agent credential olmaydi va ingest/notify yo'lida qatnashmaydi.
 
 **Naming/Timezone:** RTK.md qoidalari amal qiladi — barcha vaqt UTC (ISO 8601 Z), API JSON snake_case, kod camelCase.
 
 ### 4.1 Ingest mexanizmi (signal → Hermes)
 
-**Asosiy manba = Telegram bot** (`@brodyone_bot`). Email (Mailcow) = ikkilamchi.
+**Asosiy manba = Telegram bot** (`@brodyone_bot`). Email (Stalwart) = ikkilamchi.
 
 ```
 Telegram bot ──getUpdates(offset)──► /loop poll (CC) ──► PO triage
@@ -140,7 +142,7 @@ Telegram bot ──getUpdates(offset)──► /loop poll (CC) ──► PO tria
   filter → signal → dedup → PO agent. Alohida servis yo'q. **Qurilgan + live.**
 - **Filter:** group'da faqat `@bot` mention yoki `/task` komut (bot privacy mode
   ON — Telegram o'zi majburlaydi); bot DM hammasi.
-- **Email (ikkilamchi):** Mailcow MCP/IMAP — xuddi shu `signal` interfeysiga
+- **Email (ikkilamchi):** Stalwart IMAP yoki JMAP — xuddi shu `signal` interfeysiga
   map qilinadi, keyingi slice.
 - **Production:** Telegram webhook → HTTP endpoint → Hermes router (Agent SDK).
 - Slack/manual: bir xil dispatch (`signal` = `{chat_id, msg_id, from, text, ts}`).
@@ -164,7 +166,7 @@ Self-host = ko'p maxfiy kalit. Markazlashtirilgan boshqaruv:
 | Telegram bot token | `.env` (gitignore) | ingest poll (`@brodyone_bot`) |
 | Plane/Docmost API token | `.env` (gitignore) / Docker secret | PO, PM agentlar |
 | GitLab PAT (scoped) | `.env` / CI variable | Dev crew, QA, DevOps |
-| Mailcow IMAP/SMTP cred | `.env` / Docker secret | ingest-worker, Marketing |
+| Stalwart IMAP/JMAP va SMTP app credential | `.env` / Docker secret | ingest-worker, Marketing |
 | SSH deploy key | server keyring | DevOps |
 
 **Qoidalar:**
@@ -195,7 +197,7 @@ Hermes har "turn"da Plane + board'ni qayta o'qiydi → stale ishlamaydi.
 - **Struktur log:** har agent harakati JSON log (UTC ts, agent, action, signal_id, verdict). Markaziy log (server tanlovi: GitLab yoki alohida Loki/stdout).
 - **Status tracking:** har Issue Plane'da bosqich label'iga ega (`stage:triage`→`stage:dev`→...). Hermes yopilmagan/qotib qolgan Issue'larni kuzatadi.
 - **Heartbeat:** uzoq agent (dev crew) timeout bilan — N daqiqada javob yo'q → Hermes eskalatsiya.
-- **Alert:** GATE fail yoki agent xato → Mailcow orqali sizga xabar (yoki Slack).
+- **Alert:** GATE fail yoki agent xato → Stalwart SMTP orqali sizga xabar (yoki Telegram).
 - **`.todos/monitoring.md`** = lokal dashboard (auto-generated, task-flow).
 
 ---
@@ -213,7 +215,7 @@ Ikki variant:
 
 ### B) Claude Agent SDK (production — doimiy servis)
 - Har agent = alohida SDK process, MCP tool'lar ulangan.
-- Hermes = router servis (webhook: Mailcow/Plane → agent dispatch).
+- Hermes = router servis (Stalwart mail worker / Plane webhook → agent dispatch).
 - Holat Plane'da, memory MCP'da.
 - 24/7 ishlaydi, event-driven.
 
@@ -224,7 +226,7 @@ Ikki variant:
 ---
 name: po-agent
 description: Product Owner — triages raw input into Plane issues with acceptance criteria
-allowed_tools: [Read, mcp__plane__*, mcp__docmost__*, mcp__mailcow__*]
+allowed_tools: [Read, mcp__plane__*, mcp__docmost__*]
 ---
 Sen Product Owner agentisan. Kiruvchi muammoni:
 1. Tasnifla: bug / feature / debt / savol
@@ -242,10 +244,10 @@ Roadmapga qo'shishdan OLDIN to'xta — human gate kerak.
 ```
 hermes-adlc/
 ├── ARCHITECTURE.md          # ← shu hujjat
-├── selfhost/                # 3-server infra (Plane/Docmost/GitLab/Mailcow) — TAYYOR
+├── selfhost/                # 3-server infra (Plane/Docmost/GitLab/Stalwart+Bulwark)
 │   ├── server1-plane-docs/  # Plane + Docmost + Caddy
 │   ├── server2-gitlab/      # GitLab CE
-│   ├── server3-mailcow/     # Mailcow
+│   ├── server3-stalwart-bulwark/ # Stalwart + Bulwark + Caddy
 │   ├── dns/  backup/
 │   └── README.md
 ├── .claude/
@@ -264,8 +266,8 @@ hermes-adlc/
 │   │   └── adlc-pipeline.js
 │   └── settings.json        # MCP serverlar, permissions, gate hook'lari
 ├── integrations/            # MCP ulanish config (tayyor MCP, custom emas)
-│   ├── mcp.md               # Plane/Docmost/GitLab/Mailcow MCP add buyruqlar + token
-│   └── mailcow-ingest/      # faqat signal-trigger worker (poll/webhook)
+│   ├── mcp.md               # Plane/Docmost/GitLab MCP add buyruqlar + token
+│   └── stalwart-ingest/     # IMAP/JMAP signal worker (poll/webhook)
 └── docs/
     └── gates.md             # 80/20 gate ta'riflari + eskalatsiya qoidalari
 ```
@@ -285,8 +287,8 @@ hermes-adlc/
 
 | Faza | Natija | Vaqt | Holat |
 |------|--------|------|-------|
-| **−1. Infra** | 3-server self-host (Plane/Docmost/GitLab/Mailcow) + Caddy + backup | — | ✅ DONE (`selfhost/`) |
-| **0. Setup** | Plane/Docmost/GitLab/Mailcow MCP ulanish (tayyor MCP, config+token) + repo skeleton | 1 kun | ⏭ keyingi |
+| **−1. Infra** | 3-server self-host (Plane/Docmost/GitLab/Stalwart+Bulwark) + Caddy + backup | — | 🔄 migration tayyor, cutover gate kutiladi |
+| **0. Setup** | Plane/Docmost/GitLab MCP + Stalwart IMAP/SMTP/JMAP adapter config | 1 kun | ⏭ keyingi |
 | **1. PO agent** | Telegram→Plane Issue (gate + dedup bilan) | 1-2 kun | 🔨 ingest qurildi |
 | **2. PM agent** | Issue→sub-issue breakdown | 1 kun | |
 | **3. Dev crew** | task→TDD kod→MR (1 til bilan boshlash) | 3-5 kun | |
@@ -302,7 +304,7 @@ hermes-adlc/
 ## 9. Xavf va cheklovlar
 
 - **Gate'larni o'tkazib yubormang:** merge va prod deploy — DOIM human. AI o'zi merge qilmasin.
-- **MCP versiya mosligi:** tayyor MCP'lar (Plane/Docmost/GitLab/Mailcow) self-host versiyaga mos bo'lishi shart — API o'zgarsa MCP buzilishi mumkin. Pin qilingan versiya ishlat.
+- **Integratsiya versiya mosligi:** Plane/Docmost/GitLab MCP'lari va Stalwart/Bulwark image'lari self-host versiyaga mos bo'lishi shart. Test qilingan tag/digestlarni pin qiling.
 - **Token narxi:** parallel crew qimmat. Workflow tool bilan boshqarib, kerakli joyda model tier tanlang.
 - **Plane spam:** PO agent har xabarni Issue qilmasin — dedup/fingerprint filtri majburiy (§4.2).
 - **Konflikt:** parallel dev = worktree isolation majburiy.
