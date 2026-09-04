@@ -1,5 +1,7 @@
 # ✅ DONE
 
+- [x] 🟠 🚀 AIBUS docs Plane Pages'ga joylandi: 23 docs, 24 pages, index attached. <!-- asana:1217766042738669 plane:cf05ca0b-be48-4b4d-aa40-da2d05502b0f -->
+
 - [x] 🔴 🚀 hermesd — headless Telegram-driven orchestrator daemon (Design B): `server/{hermesd,ladder,router,state,claude-agent}.mjs` + RealPlane REST + TelegramNotify + `HERMES_MODE=real`. claude -p reasoning (Max sub), daemon owns all IO, 6-gate ladder over telegram buttons w/ role-authz. 107 test (was 79), live-verified PO→JSON. systemd unit + `docs/DEPLOY-TELEGRAM.md` step-by-step for server 31.40.29.203
 - [x] 🟡 🚀 ingest/gate-io.mjs — sendGate/ackCallback thin telegram IO (fetch-injectable, 3 test) + .env.example HERMES_ROLES + docs/role-flow.md §6 human gate layer; 79/79 test, pushed
 - [x] 🟠 🚀 ingest/gate.mjs — bidirectional telegram gate (test-first, 6 test): buildGate(inline_keyboard) + parseCallback(callback_query) + decide(authz); compact callback_data `g:<gate>:<id>:<a|r>`
